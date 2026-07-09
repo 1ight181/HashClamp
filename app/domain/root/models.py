@@ -1,8 +1,13 @@
 from pathlib import Path
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import TypedDict, Unpack
 from uuid import UUID, uuid4
-from datetime import datetime, timezone
+
+from exceptions import (
+    InvalidRootDataError,
+    InvalidRootUpdateError,
+)
 
 
 @dataclass
@@ -14,13 +19,25 @@ class Root:
 
     scan_interval_minutes: int
 
-    id: UUID = field(init=False, default_factory=uuid4())
+    id: UUID = field(
+        init=False,
+        default_factory=uuid4,
+    )
 
-    created_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
+    created_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
+
+    updated_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
+
 
     class RootCreateOptions(TypedDict, total=False):
         scan_interval_minutes: int
+
 
     @classmethod
     def create(
@@ -29,40 +46,27 @@ class Root:
             alias: str,
             node_id: UUID,
             **kwargs: Unpack[RootCreateOptions],
-    ):
-        """
-        Creates a new root.
+    ) -> "Root":
 
-        Args:
-            path: Absolute filesystem path.
-            alias: Human-readable root alias.
-            node_id: Identifier of the owning node.
-            **kwargs:
-                scan_interval_minutes: Scan interval in minutes.
+        cls._validate_path(path)
 
-        Returns:
-            A new Root instance.
-
-        Raises:
-            TypeError: If an argument has an invalid type.
-            ValueError: If an argument has an invalid value.
-        """
-        if not path.is_absolute():
-            raise ValueError(f"Root path {path} is not absolute")
-
-        if not alias.strip():
-            raise ValueError(f"Root alias must not be empty")
+        cls._validate_alias(alias)
 
         if not node_id:
-            raise ValueError(f"Root node_id must not be empty")
+            raise InvalidRootDataError(
+                "Root node id cannot be empty"
+            )
 
-        scan_interval_minutes = kwargs.get('scan_interval_minutes')
+
+        scan_interval_minutes = kwargs.get(
+            "scan_interval_minutes"
+        )
+
         if scan_interval_minutes is not None:
-            if isinstance(scan_interval_minutes, int):
-                if scan_interval_minutes <= 0:
-                    raise ValueError(f"Scan interval {scan_interval_minutes} must be positive")
-            else:
-                raise TypeError("Scan_interval_minutes must be positive integer")
+            cls._validate_scan_interval(
+                scan_interval_minutes
+            )
+
 
         return cls(
             path=path,
@@ -71,50 +75,90 @@ class Root:
             **kwargs,
         )
 
+
     class RootUpdateOptions(TypedDict, total=False):
         path: Path
         alias: str
         scan_interval_minutes: int
 
-    def update(self,**kwargs: Unpack[RootUpdateOptions]) -> bool:
-        """
-            Updates the entity.
 
-            Returns:
-                bool: True if at least one field was changed, False otherwise.
-        """
+    def update(
+            self,
+            **kwargs: Unpack[RootUpdateOptions],
+    ) -> bool:
+
         allowed_fields = {
-            'alias',
-            'scan_interval_minutes',
-            'path',
+            "path",
+            "alias",
+            "scan_interval_minutes",
         }
 
-        unknown = set(kwargs) - allowed_fields
-        if unknown:
-            raise ValueError(f"Unknown fields {unknown}")
 
-        path = kwargs.get('path')
+        unknown_fields = set(kwargs) - allowed_fields
+
+        if unknown_fields:
+            raise InvalidRootUpdateError(
+                f"Unknown fields: {unknown_fields}"
+            )
+
+
+        path = kwargs.get("path")
+
         if path is not None:
-            if isinstance(path, Path):
-                if not path.is_absolute():
-                    raise ValueError(f"Root path {path} is not absolute")
-            else:
-                raise TypeError("Root path must be a Path")
+            self._validate_path(path)
 
-        scan_interval_minutes = kwargs.get('scan_interval_minutes')
+
+        alias = kwargs.get("alias")
+
+        if alias is not None:
+            self._validate_alias(alias)
+
+
+        scan_interval_minutes = kwargs.get(
+            "scan_interval_minutes"
+        )
+
         if scan_interval_minutes is not None:
-            if isinstance(scan_interval_minutes, int):
-                if scan_interval_minutes <= 0:
-                    raise ValueError(f"Scan interval {scan_interval_minutes} must be positive")
-            else:
-                raise TypeError("Scan interval must be positive integer")
+            self._validate_scan_interval(
+                scan_interval_minutes
+            )
 
-        was_updated = False
+
+        if not kwargs:
+            return False
+
+
         for key, value in kwargs.items():
             setattr(self, key, value)
-            was_updated = True
 
-        if was_updated:
-            self.updated_at = datetime.now()
 
-        return was_updated
+        self.updated_at = datetime.now(timezone.utc)
+
+        return True
+
+
+    @staticmethod
+    def _validate_path(path: Path) -> None:
+        if not path.is_absolute():
+            raise InvalidRootDataError(
+                f"Root path {path} is not absolute"
+            )
+
+
+    @staticmethod
+    def _validate_alias(alias: str) -> None:
+        if not alias.strip():
+            raise InvalidRootDataError(
+                "Root alias cannot be empty"
+            )
+
+
+    @staticmethod
+    def _validate_scan_interval(
+            scan_interval_minutes: int,
+    ) -> None:
+
+        if scan_interval_minutes <= 0:
+            raise InvalidRootDataError(
+                "Scan interval must be positive"
+            )

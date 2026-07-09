@@ -1,15 +1,22 @@
+import base64
 import re
+
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from uuid import UUID, uuid4
-from typing import Optional, TypedDict, Unpack
-import base64
-
 from pathlib import Path
+from typing import Optional, TypedDict, Unpack
+from uuid import UUID, uuid4
+
+from domain.exceptions.file_entry import (
+    InvalidFileEntryDataError,
+    InvalidFileEntryUpdateError,
+)
+
 
 FILENAME_REGEX = re.compile(
     r'^[^\\/:*?"<>|]+$'
 )
+
 
 @dataclass
 class FileEntry:
@@ -21,16 +28,41 @@ class FileEntry:
     file_size: int
     hash_base64: str
 
-    id: UUID = field(init=False, default_factory=uuid4())
+    id: UUID = field(
+        init=False,
+        default_factory=uuid4,
+    )
 
-    last_modified_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
-    scanned_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
+    last_modified_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
 
-    is_deleted: bool = field(init=False, default=False)
-    previous_hash: Optional[str] = field(init=False, default=None)
+    scanned_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
 
-    created_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
-    updated_at: datetime = field(init=False, default_factory=datetime.now(timezone.utc))
+    is_deleted: bool = field(
+        init=False,
+        default=False,
+    )
+
+    previous_hash: Optional[str] = field(
+        init=False,
+        default=None,
+    )
+
+    created_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
+
+    updated_at: datetime = field(
+        init=False,
+        default_factory=lambda: datetime.now(timezone.utc),
+    )
+
 
     class FileEntryUpdateOptions(TypedDict, total=False):
         relative_path: Path
@@ -40,6 +72,7 @@ class FileEntry:
         scanned_at: datetime
         is_deleted: bool
 
+
     @classmethod
     def create(
             cls,
@@ -48,39 +81,21 @@ class FileEntry:
             filename: str,
             file_size: int,
             hash_base64: str,
-    ):
-        """
-        Creates a new file entry.
+    ) -> "FileEntry":
 
-        Args:
-            root_id: Identifier of the root containing the file.
-            relative_path: Relative path to the parent directory.
-            filename: Name of the file.
-            file_size: File size in bytes.
-            hash_base64: Base64-encoded file hash.
-
-        Returns:
-            A new FileEntry instance.
-
-        Raises:
-            ValueError: If any argument is invalid.
-        """
         if not root_id:
-            raise ValueError("Root id cannot be empty")
+            raise InvalidFileEntryDataError(
+                "Root id cannot be empty"
+            )
 
-        if relative_path.is_absolute():
-            raise ValueError("Relative path is required must be non-absolute")
+        cls._validate_relative_path(relative_path)
 
-        if not FILENAME_REGEX.match(str(filename)):
-            raise ValueError("Filename must be a valid filename (filename.ext)")
+        cls._validate_filename(filename)
 
-        if file_size < 0:
-            raise ValueError(f"File size {file_size} must be non-negative")
+        cls._validate_file_size(file_size)
 
-        try:
-            base64.b64decode(hash_base64, validate=True)
-        except Exception:
-            raise ValueError("Hash base64 is not a valid base64 string")
+        cls._validate_hash(hash_base64)
+
 
         return cls(
             root_id=root_id,
@@ -90,13 +105,12 @@ class FileEntry:
             hash_base64=hash_base64,
         )
 
-    def update(self, **kwargs: Unpack[FileEntryUpdateOptions]) -> bool:
-        """
-            Updates the entity.
 
-            Returns:
-                bool: True if at least one field was changed, False otherwise.
-        """
+    def update(
+            self,
+            **kwargs: Unpack[FileEntryUpdateOptions],
+    ) -> bool:
+
         allowed_fields = {
             "relative_path",
             "filename",
@@ -106,57 +120,109 @@ class FileEntry:
             "is_deleted",
         }
 
-        unknown = set(kwargs) - allowed_fields
-        if unknown:
-            raise ValueError(f"Unknown fields {unknown}")
+
+        unknown_fields = set(kwargs) - allowed_fields
+
+        if unknown_fields:
+            raise InvalidFileEntryUpdateError(
+                f"Unknown fields: {unknown_fields}"
+            )
+
 
         relative_path = kwargs.get("relative_path")
+
         if relative_path is not None:
-            if not isinstance(relative_path, Path):
-                raise TypeError("Relative path must be a Path")
-            if relative_path.is_absolute():
-                raise ValueError("Relative path is required must be non-absolute")
+            self._validate_relative_path(relative_path)
+
 
         filename = kwargs.get("filename")
+
         if filename is not None:
-            if not FILENAME_REGEX.match(str(filename)):
-                raise ValueError("Filename must be a valid filename (filename.ext)")
+            self._validate_filename(filename)
+
 
         file_size = kwargs.get("file_size")
+
         if file_size is not None:
-            if isinstance(file_size, int):
-                if file_size < 0:
-                    raise ValueError(f"File size {file_size} must be positive integer")
-            else:
-                raise TypeError("File_size must be an positive integer")
+            self._validate_file_size(file_size)
+
 
         hash_base64 = kwargs.get("hash_base64")
+
         if hash_base64 is not None:
-            try:
-                base64.b64decode(str(hash_base64), validate=True)
-            except Exception:
-                raise ValueError("Hash base64 is not a valid base64 string")
+            self._validate_hash(hash_base64)
 
-        scanned_at = kwargs.get("scanned_at")
-        if scanned_at is not None:
-            if not isinstance(scanned_at, datetime):
-                raise ValueError("Scanned at must be a datetime")
 
-        is_deleted = kwargs.get("is_deleted")
-        if is_deleted is not None:
-            if not isinstance(is_deleted, bool):
-                raise ValueError("Is deleted must be a boolean")
+        if not kwargs:
+            return False
 
-        was_updated = False
+
         for key, value in kwargs.items():
+
             if key == "hash_base64":
-                self.last_modified_at = datetime.now()
                 self.previous_hash = self.hash_base64
+                self.last_modified_at = datetime.now(
+                    timezone.utc
+                )
 
-            setattr(self, key, value)
-            was_updated = True
+            setattr(
+                self,
+                key,
+                value,
+            )
 
-        if was_updated:
-            self.updated_at = datetime.now()
 
-        return was_updated
+        self.updated_at = datetime.now(
+            timezone.utc
+        )
+
+        return True
+
+
+    @staticmethod
+    def _validate_relative_path(
+            path: Path,
+    ) -> None:
+
+        if path.is_absolute():
+            raise InvalidFileEntryDataError(
+                "Relative path must be non-absolute"
+            )
+
+
+    @staticmethod
+    def _validate_filename(
+            filename: str,
+    ) -> None:
+
+        if not FILENAME_REGEX.match(filename):
+            raise InvalidFileEntryDataError(
+                "Filename is invalid"
+            )
+
+
+    @staticmethod
+    def _validate_file_size(
+            file_size: int,
+    ) -> None:
+
+        if file_size < 0:
+            raise InvalidFileEntryDataError(
+                "File size must be non-negative"
+            )
+
+
+    @staticmethod
+    def _validate_hash(
+            hash_base64: str,
+    ) -> None:
+
+        try:
+            base64.b64decode(
+                hash_base64,
+                validate=True,
+            )
+        except Exception:
+            raise InvalidFileEntryDataError(
+                "Hash is not a valid base64 string"
+            )
