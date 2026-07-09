@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, TypedDict, Unpack
 from uuid import UUID, uuid4
 
-from domain.exceptions.file_entry import (
+from exceptions import (
     InvalidFileEntryDataError,
     InvalidFileEntryUpdateError,
 )

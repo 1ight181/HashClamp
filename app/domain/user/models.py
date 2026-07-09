@@ -25,7 +25,10 @@ class User:
 
     fullname: Optional[str] = None
 
-    id: UUID = field(init=False, default_factory=uuid4)
+    id: UUID = field(
+        init=False,
+        default_factory=uuid4,
+    )
 
     created_at: datetime = field(
         init=False,
@@ -63,61 +66,56 @@ class User:
             **kwargs: Unpack[UserCreateOptions],
     ) -> "User":
 
-        if len(username.strip()) < 3:
-            raise InvalidUserDataError(
-                "Username must be at least 3 characters long"
-            )
+        cls._validate_username(username)
 
-        if not EMAIL_REGEX.match(email):
-            raise InvalidUserDataError(
-                "Email address is invalid"
-            )
+        cls._validate_email(email)
 
-        if not password_hash.strip():
-            raise InvalidUserDataError(
-                "Password hash cannot be empty"
-            )
+        cls._validate_password_hash(password_hash)
 
-        notification_email = kwargs.get("notification_email")
+
+        notification_email = kwargs.get(
+            "notification_email"
+        )
 
         if notification_email is not None:
-            if not EMAIL_REGEX.match(notification_email):
-                raise InvalidUserDataError(
-                    "Notification email address is invalid"
-                )
+            cls._validate_email(
+                notification_email,
+                notification=True,
+            )
 
-        default_scan_interval_minutes = kwargs.get(
+
+        scan_interval = kwargs.get(
             "default_scan_interval_minutes"
         )
 
-        if default_scan_interval_minutes is not None:
-            if default_scan_interval_minutes <= 0:
-                raise InvalidUserDataError(
-                    "Default scan interval minutes must be positive"
-                )
+        if scan_interval is not None:
+            cls._validate_scan_interval(scan_interval)
 
-        max_nodes = kwargs.get("max_nodes")
+
+        max_nodes = kwargs.get(
+            "max_nodes"
+        )
 
         if max_nodes is not None:
-            if max_nodes <= 0:
-                raise InvalidUserDataError(
-                    "Max nodes must be positive"
-                )
+            cls._validate_max_nodes(max_nodes)
 
-        should_notify_on_changes = kwargs.get(
+
+        should_notify = kwargs.get(
             "should_notify_on_changes",
             False,
         )
 
-        if should_notify_on_changes and not notification_email:
-            raise InvalidUserDataError(
-                "Notification email is required when notifications are enabled"
-            )
+        cls._validate_notifications(
+            should_notify,
+            notification_email,
+        )
+
 
         fullname = kwargs.get(
             "fullname",
             username,
         )
+
 
         return cls(
             username=username,
@@ -155,6 +153,7 @@ class User:
             "is_superuser",
         }
 
+
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
@@ -162,65 +161,155 @@ class User:
                 f"Unknown fields: {unknown_fields}"
             )
 
-        email = kwargs.get("email")
 
-        if email is not None:
-            if not EMAIL_REGEX.match(email.strip()):
-                raise InvalidUserUpdateError(
-                    "Email address is invalid"
+        try:
+            username = kwargs.get("username")
+
+            if username is not None:
+                self._validate_username(username)
+
+
+            email = kwargs.get("email")
+
+            if email is not None:
+                self._validate_email(email)
+
+
+            notification_email = kwargs.get(
+                "notification_email"
+            )
+
+            if notification_email is not None:
+                self._validate_email(
+                    notification_email,
+                    notification=True,
                 )
 
-        username = kwargs.get("username")
 
-        if username is not None:
-            if len(username.strip()) < 3:
-                raise InvalidUserUpdateError(
-                    "Username must be at least 3 characters long"
+            should_notify = kwargs.get(
+                "should_notify_on_changes"
+            )
+
+            if should_notify is not None:
+                self._validate_notifications(
+                    should_notify,
+                    notification_email
+                    if notification_email is not None
+                    else self.notification_email,
                 )
 
-        should_notify_on_changes = kwargs.get(
-            "should_notify_on_changes"
-        )
 
-        notification_email = kwargs.get(
-            "notification_email"
-        )
+            scan_interval = kwargs.get(
+                "default_scan_interval_minutes"
+            )
 
-        if should_notify_on_changes is True:
-            if not notification_email:
-                raise InvalidUserUpdateError(
-                    "Notification email is required when notifications are enabled"
+            if scan_interval is not None:
+                self._validate_scan_interval(
+                    scan_interval
                 )
 
-            if not EMAIL_REGEX.match(notification_email):
-                raise InvalidUserUpdateError(
-                    "Notification email address is invalid"
+
+            max_nodes = kwargs.get(
+                "max_nodes"
+            )
+
+            if max_nodes is not None:
+                self._validate_max_nodes(
+                    max_nodes
                 )
 
-        default_scan_interval_minutes = kwargs.get(
-            "default_scan_interval_minutes"
-        )
 
-        if default_scan_interval_minutes is not None:
-            if default_scan_interval_minutes <= 0:
-                raise InvalidUserUpdateError(
-                    "Default scan interval minutes must be positive"
-                )
+        except InvalidUserDataError as error:
+            raise InvalidUserUpdateError(
+                str(error)
+            )
 
-        max_nodes = kwargs.get("max_nodes")
-
-        if max_nodes is not None:
-            if max_nodes <= 0:
-                raise InvalidUserUpdateError(
-                    "Max nodes must be positive"
-                )
 
         if not kwargs:
             return False
 
+
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        self.updated_at = datetime.now(timezone.utc)
+
+        self.updated_at = datetime.now(
+            timezone.utc
+        )
 
         return True
+
+
+    @staticmethod
+    def _validate_username(
+            username: str,
+    ) -> None:
+
+        if len(username.strip()) < 3:
+            raise InvalidUserDataError(
+                "Username must be at least 3 characters long"
+            )
+
+
+    @staticmethod
+    def _validate_email(
+            email: str,
+            notification: bool = False,
+    ) -> None:
+
+        if not EMAIL_REGEX.match(
+            email.strip()
+        ):
+            if notification:
+                raise InvalidUserDataError(
+                    "Notification email address is invalid"
+                )
+
+            raise InvalidUserDataError(
+                "Email address is invalid"
+            )
+
+
+    @staticmethod
+    def _validate_password_hash(
+            password_hash: str,
+    ) -> None:
+
+        if not password_hash.strip():
+            raise InvalidUserDataError(
+                "Password hash cannot be empty"
+            )
+
+
+    @staticmethod
+    def _validate_scan_interval(
+            scan_interval_minutes: int,
+    ) -> None:
+
+        if scan_interval_minutes <= 0:
+            raise InvalidUserDataError(
+                "Default scan interval minutes must be positive"
+            )
+
+
+    @staticmethod
+    def _validate_max_nodes(
+            max_nodes: int,
+    ) -> None:
+
+        if max_nodes <= 0:
+            raise InvalidUserDataError(
+                "Max nodes must be positive"
+            )
+
+
+    @staticmethod
+    def _validate_notifications(
+            should_notify: bool,
+            notification_email: Optional[str],
+    ) -> None:
+
+        if should_notify and not notification_email:
+            raise InvalidUserDataError(
+                "Notification email is required when notifications are enabled"
+            )

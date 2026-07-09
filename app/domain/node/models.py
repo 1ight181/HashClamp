@@ -67,20 +67,9 @@ class Node:
             **kwargs: Unpack[NodeCreateOptions],
     ) -> "Node":
 
-        if len(name.strip()) < 3:
-            raise InvalidNodeDataError(
-                "Name must be at least 3 characters long"
-            )
-
-        if not os_type.strip():
-            raise InvalidNodeDataError(
-                "OS type cannot be empty"
-            )
-
-        if not os_version.strip():
-            raise InvalidNodeDataError(
-                "OS version cannot be empty"
-            )
+        cls._validate_name(name)
+        cls._validate_os_type(os_type)
+        cls._validate_os_version(os_version)
 
         if not user_id:
             raise InvalidNodeDataError(
@@ -88,42 +77,27 @@ class Node:
             )
 
         hostname = kwargs.get("hostname")
-
         if hostname is not None:
             cls._validate_hostname(hostname)
 
-
         ip_addresses = kwargs.get("ip_addresses")
-
         if ip_addresses is not None:
             cls._validate_ip_addresses(ip_addresses)
 
-
         port = kwargs.get("port")
-
         if port is not None:
             cls._validate_port(port)
 
-
         max_roots = kwargs.get("max_roots")
-
         if max_roots is not None:
-            if max_roots <= 0:
-                raise InvalidNodeDataError(
-                    "Max roots must be positive"
-                )
-
+            cls._validate_max_roots(max_roots)
 
         scan_interval = kwargs.get(
             "default_scan_interval_minutes"
         )
 
         if scan_interval is not None:
-            if scan_interval <= 0:
-                raise InvalidNodeDataError(
-                    "Default scan interval must be positive"
-                )
-
+            cls._validate_scan_interval(scan_interval)
 
         return cls(
             name=name,
@@ -169,51 +143,54 @@ class Node:
             )
 
 
-        name = kwargs.get("name")
-
-        if name is not None:
-            if len(name.strip()) < 3:
-                raise InvalidNodeUpdateError(
-                    "Name must be at least 3 characters long"
-                )
+        try:
+            name = kwargs.get("name")
+            if name is not None:
+                self._validate_name(name)
 
 
-        hostname = kwargs.get("hostname")
-
-        if hostname is not None:
-            self._validate_hostname(hostname)
-
-
-        ip_addresses = kwargs.get("ip_addresses")
-
-        if ip_addresses is not None:
-            self._validate_ip_addresses(ip_addresses)
+            os_type = kwargs.get("os_type")
+            if os_type is not None:
+                self._validate_os_type(os_type)
 
 
-        port = kwargs.get("port")
-
-        if port is not None:
-            self._validate_port(port)
-
-
-        max_roots = kwargs.get("max_roots")
-
-        if max_roots is not None:
-            if max_roots <= 0:
-                raise InvalidNodeUpdateError(
-                    "Max roots must be positive"
-                )
+            os_version = kwargs.get("os_version")
+            if os_version is not None:
+                self._validate_os_version(os_version)
 
 
-        scan_interval = kwargs.get(
-            "default_scan_interval_minutes"
-        )
+            hostname = kwargs.get("hostname")
+            if hostname is not None:
+                self._validate_hostname(hostname)
 
-        if scan_interval is not None:
-            if scan_interval <= 0:
-                raise InvalidNodeUpdateError(
-                    "Default scan interval must be positive"
-                )
+
+            ip_addresses = kwargs.get("ip_addresses")
+            if ip_addresses is not None:
+                self._validate_ip_addresses(ip_addresses)
+
+
+            port = kwargs.get("port")
+            if port is not None:
+                self._validate_port(port)
+
+
+            max_roots = kwargs.get("max_roots")
+            if max_roots is not None:
+                self._validate_max_roots(max_roots)
+
+
+            scan_interval = kwargs.get(
+                "default_scan_interval_minutes"
+            )
+
+            if scan_interval is not None:
+                self._validate_scan_interval(scan_interval)
+
+
+        except InvalidNodeDataError as error:
+            raise InvalidNodeUpdateError(
+                str(error)
+            )
 
 
         if not kwargs:
@@ -227,6 +204,30 @@ class Node:
         self.updated_at = datetime.now(timezone.utc)
 
         return True
+
+
+    @staticmethod
+    def _validate_name(name: str) -> None:
+        if len(name.strip()) < 3:
+            raise InvalidNodeDataError(
+                "Name must be at least 3 characters long"
+            )
+
+
+    @staticmethod
+    def _validate_os_type(os_type: str) -> None:
+        if not os_type.strip():
+            raise InvalidNodeDataError(
+                "OS type cannot be empty"
+            )
+
+
+    @staticmethod
+    def _validate_os_version(os_version: str) -> None:
+        if not os_version.strip():
+            raise InvalidNodeDataError(
+                "OS version cannot be empty"
+            )
 
 
     @staticmethod
@@ -256,4 +257,23 @@ class Node:
         if port < 1 or port > 65535:
             raise InvalidNodeDataError(
                 "Port must be between 1 and 65535"
+            )
+
+
+    @staticmethod
+    def _validate_max_roots(max_roots: int) -> None:
+        if max_roots <= 0:
+            raise InvalidNodeDataError(
+                "Max roots must be positive"
+            )
+
+
+    @staticmethod
+    def _validate_scan_interval(
+            scan_interval_minutes: int,
+    ) -> None:
+
+        if scan_interval_minutes <= 0:
+            raise InvalidNodeDataError(
+                "Default scan interval must be positive"
             )
