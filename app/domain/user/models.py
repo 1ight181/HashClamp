@@ -26,7 +26,6 @@ class User:
     fullname: Optional[str] = None
 
     id: UUID = field(
-        init=False,
         default_factory=uuid4,
     )
 
@@ -130,7 +129,7 @@ class User:
     def update(
             self,
             **kwargs: Unpack[UserUpdateOptions],
-    ) -> bool:
+    ):
 
         allowed_fields = {
             "username",
@@ -214,21 +213,92 @@ class User:
                 str(error)
             )
 
-
-        if not kwargs:
-            return False
-
-
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    class UserRestoreOptions(TypedDict, total=False):
+        fullname: str
+        notification_email: str
+        should_notify_on_changes: bool
+        default_scan_interval_minutes: int
+        max_nodes: int
+        is_active: bool
+        is_superuser: bool
 
-        self.updated_at = datetime.now(
-            timezone.utc
+    @classmethod
+    def restore(
+            cls,
+            id: UUID,
+            username: str,
+            email: str,
+            password_hash: str,
+            **kwargs: Unpack[UserRestoreOptions],
+    ) -> "User":
+
+        if not id:
+            raise InvalidUserDataError(
+                "User id cannot be empty"
+            )
+
+        cls._validate_username(username)
+
+        cls._validate_email(email)
+
+        cls._validate_password_hash(password_hash)
+
+        notification_email = kwargs.get(
+            "notification_email"
         )
 
-        return True
+        if notification_email is not None:
+            cls._validate_email(
+                notification_email,
+                notification=True,
+            )
 
+        scan_interval = kwargs.get(
+            "default_scan_interval_minutes"
+        )
+
+        if scan_interval is not None:
+            cls._validate_scan_interval(
+                scan_interval
+            )
+
+        max_nodes = kwargs.get(
+            "max_nodes"
+        )
+
+        if max_nodes is not None:
+            cls._validate_max_nodes(
+                max_nodes
+            )
+
+        should_notify = kwargs.get(
+            "should_notify_on_changes",
+            False,
+        )
+
+        cls._validate_notifications(
+            should_notify,
+            notification_email,
+        )
+
+        fullname = kwargs.get(
+            "fullname",
+            username,
+        )
+
+        user = cls(
+            id=id,
+            username=username,
+            email=email,
+            fullname=fullname,
+            password_hash=password_hash,
+            **kwargs,
+        )
+
+        return user
 
     @staticmethod
     def _validate_username(

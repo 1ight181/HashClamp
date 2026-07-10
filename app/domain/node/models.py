@@ -27,7 +27,6 @@ class Node:
     user_id: UUID
 
     id: UUID = field(
-        init=False,
         default_factory=uuid4,
     )
 
@@ -38,13 +37,12 @@ class Node:
     max_roots: int = 50
     default_scan_interval_minutes: int = 30
 
-    class NodeCreateOptions(TypedDict, total=False):
+    class NodeOptions(TypedDict, total=False):
         hostname: str
         ip_addresses: list[str]
         port: int
         max_roots: int
         default_scan_interval_minutes: int
-
 
     @classmethod
     def create(
@@ -53,40 +51,16 @@ class Node:
             os_type: str,
             os_version: str,
             user_id: UUID,
-            **kwargs: Unpack[NodeCreateOptions],
+            **kwargs: Unpack[NodeOptions],
     ) -> "Node":
 
-        cls._validate_name(name)
-        cls._validate_os_type(os_type)
-        cls._validate_os_version(os_version)
-
-        if not user_id:
-            raise InvalidNodeDataError(
-                "User id cannot be empty"
-            )
-
-        hostname = kwargs.get("hostname")
-        if hostname is not None:
-            cls._validate_hostname(hostname)
-
-        ip_addresses = kwargs.get("ip_addresses")
-        if ip_addresses is not None:
-            cls._validate_ip_addresses(ip_addresses)
-
-        port = kwargs.get("port")
-        if port is not None:
-            cls._validate_port(port)
-
-        max_roots = kwargs.get("max_roots")
-        if max_roots is not None:
-            cls._validate_max_roots(max_roots)
-
-        scan_interval = kwargs.get(
-            "default_scan_interval_minutes"
+        cls._validate(
+            name=name,
+            os_type=os_type,
+            os_version=os_version,
+            user_id=user_id,
+            **kwargs,
         )
-
-        if scan_interval is not None:
-            cls._validate_scan_interval(scan_interval)
 
         return cls(
             name=name,
@@ -96,6 +70,38 @@ class Node:
             **kwargs,
         )
 
+    @classmethod
+    def restore(
+            cls,
+            id: UUID,
+            name: str,
+            os_type: str,
+            os_version: str,
+            user_id: UUID,
+            **kwargs: Unpack[NodeOptions],
+    ) -> "Node":
+
+        if not id:
+            raise InvalidNodeDataError(
+                "Node id cannot be empty"
+            )
+
+        cls._validate(
+            name=name,
+            os_type=os_type,
+            os_version=os_version,
+            user_id=user_id,
+            **kwargs,
+        )
+
+        return cls(
+            id=id,
+            name=name,
+            os_type=os_type,
+            os_version=os_version,
+            user_id=user_id,
+            **kwargs,
+        )
 
     class NodeUpdateOptions(TypedDict, total=False):
         name: str
@@ -111,7 +117,7 @@ class Node:
     def update(
             self,
             **kwargs: Unpack[NodeUpdateOptions],
-    ) -> bool:
+    ):
 
         allowed_fields = {
             "name",
@@ -182,18 +188,75 @@ class Node:
             )
 
 
-        if not kwargs:
-            return False
-
-
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 
-        self.updated_at = datetime.now(timezone.utc)
+    @classmethod
+    def _validate(
+            cls,
+            name: str,
+            os_type: str,
+            os_version: str,
+            user_id: UUID,
+            **kwargs: Unpack[NodeCreateOptions],
+    ) -> None:
 
-        return True
+        cls._validate_name(name)
 
+        cls._validate_os_type(os_type)
+
+        cls._validate_os_version(os_version)
+
+        if not user_id:
+            raise InvalidNodeDataError(
+                "User id cannot be empty"
+            )
+
+        hostname = kwargs.get(
+            "hostname"
+        )
+
+        if hostname is not None:
+            cls._validate_hostname(
+                hostname
+            )
+
+        ip_addresses = kwargs.get(
+            "ip_addresses"
+        )
+
+        if ip_addresses is not None:
+            cls._validate_ip_addresses(
+                ip_addresses
+            )
+
+        port = kwargs.get(
+            "port"
+        )
+
+        if port is not None:
+            cls._validate_port(
+                port
+            )
+
+        max_roots = kwargs.get(
+            "max_roots"
+        )
+
+        if max_roots is not None:
+            cls._validate_max_roots(
+                max_roots
+            )
+
+        scan_interval = kwargs.get(
+            "default_scan_interval_minutes"
+        )
+
+        if scan_interval is not None:
+            cls._validate_scan_interval(
+                scan_interval
+            )
 
     @staticmethod
     def _validate_name(name: str) -> None:

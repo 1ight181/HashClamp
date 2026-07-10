@@ -1,6 +1,5 @@
 from pathlib import Path
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import TypedDict, Unpack
 from uuid import UUID, uuid4
 
@@ -20,13 +19,8 @@ class Root:
     scan_interval_minutes: int
 
     id: UUID = field(
-        init=False,
         default_factory=uuid4,
     )
-
-    class RootCreateOptions(TypedDict, total=False):
-        scan_interval_minutes: int
-
 
     @classmethod
     def create(
@@ -34,34 +28,51 @@ class Root:
             path: Path,
             alias: str,
             node_id: UUID,
-            **kwargs: Unpack[RootCreateOptions],
+            scan_interval_minutes: int,
     ) -> "Root":
 
-        cls._validate_path(path)
-
-        cls._validate_alias(alias)
-
-        if not node_id:
-            raise InvalidRootDataError(
-                "Root node id cannot be empty"
-            )
-
-
-        scan_interval_minutes = kwargs.get(
-            "scan_interval_minutes"
+        cls._validate(
+            path=path,
+            alias=alias,
+            node_id=node_id,
+            scan_interval_minutes=scan_interval_minutes,
         )
-
-        if scan_interval_minutes is not None:
-            cls._validate_scan_interval(
-                scan_interval_minutes
-            )
-
 
         return cls(
             path=path,
             alias=alias,
             node_id=node_id,
-            **kwargs,
+            scan_interval_minutes=scan_interval_minutes,
+        )
+
+    @classmethod
+    def restore(
+            cls,
+            id: UUID,
+            path: Path,
+            alias: str,
+            node_id: UUID,
+            scan_interval_minutes: int,
+    ) -> "Root":
+
+        if not id:
+            raise InvalidRootDataError(
+                "Root id cannot be empty"
+            )
+
+        cls._validate(
+            path=path,
+            alias=alias,
+            node_id=node_id,
+            scan_interval_minutes=scan_interval_minutes,
+        )
+
+        return cls(
+            id=id,
+            path=path,
+            alias=alias,
+            node_id=node_id,
+            scan_interval_minutes=scan_interval_minutes,
         )
 
 
@@ -74,7 +85,7 @@ class Root:
     def update(
             self,
             **kwargs: Unpack[RootUpdateOptions],
-    ) -> bool:
+    ):
 
         allowed_fields = {
             "path",
@@ -112,19 +123,30 @@ class Root:
                 scan_interval_minutes
             )
 
-
-        if not kwargs:
-            return False
-
-
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    @classmethod
+    def _validate(
+            cls,
+            path: Path,
+            alias: str,
+            node_id: UUID,
+            scan_interval_minutes: int,
+    ) -> None:
 
-        self.updated_at = datetime.now(timezone.utc)
+        cls._validate_path(path)
 
-        return True
+        cls._validate_alias(alias)
 
+        if not node_id:
+            raise InvalidRootDataError(
+                "Root node id cannot be empty"
+            )
+
+        cls._validate_scan_interval(
+            scan_interval_minutes
+        )
 
     @staticmethod
     def _validate_path(path: Path) -> None:

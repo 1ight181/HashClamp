@@ -29,26 +29,18 @@ class FileEntry:
     hash_base64: str
 
     id: UUID = field(
-        init=False,
         default_factory=uuid4,
     )
 
     last_modified_at: datetime = field(
-        init=False,
         default_factory=lambda: datetime.now(timezone.utc),
     )
 
     scanned_at: datetime = field(
-        init=False,
         default_factory=lambda: datetime.now(timezone.utc),
     )
 
-    is_deleted: bool = field(
-        init=False,
-        default=False,
-    )
-
-
+    is_deleted: bool = False
 
     class FileEntryUpdateOptions(TypedDict, total=False):
         relative_path: Path
@@ -58,6 +50,10 @@ class FileEntry:
         scanned_at: datetime
         is_deleted: bool
 
+    class FileEntryRestoreOptions(TypedDict, total=False):
+        last_modified_at: datetime
+        scanned_at: datetime
+        is_deleted: bool
 
     @classmethod
     def create(
@@ -69,19 +65,13 @@ class FileEntry:
             hash_base64: str,
     ) -> "FileEntry":
 
-        if not root_id:
-            raise InvalidFileEntryDataError(
-                "Root id cannot be empty"
-            )
-
-        cls._validate_relative_path(relative_path)
-
-        cls._validate_filename(filename)
-
-        cls._validate_file_size(file_size)
-
-        cls._validate_hash(hash_base64)
-
+        cls._validate(
+            root_id=root_id,
+            relative_path=relative_path,
+            filename=filename,
+            file_size=file_size,
+            hash_base64=hash_base64,
+        )
 
         return cls(
             root_id=root_id,
@@ -91,6 +81,40 @@ class FileEntry:
             hash_base64=hash_base64,
         )
 
+    @classmethod
+    def restore(
+            cls,
+            id: UUID,
+            root_id: UUID,
+            relative_path: Path,
+            filename: str,
+            file_size: int,
+            hash_base64: str,
+            **kwargs: Unpack[FileEntryRestoreOptions],
+    ) -> "FileEntry":
+
+        if not id:
+            raise InvalidFileEntryDataError(
+                "File entry id cannot be empty"
+            )
+
+        cls._validate(
+            root_id=root_id,
+            relative_path=relative_path,
+            filename=filename,
+            file_size=file_size,
+            hash_base64=hash_base64,
+        )
+
+        return cls(
+            id=id,
+            root_id=root_id,
+            relative_path=relative_path,
+            filename=filename,
+            file_size=file_size,
+            hash_base64=hash_base64,
+            **kwargs,
+        )
 
     def update(
             self,
@@ -164,6 +188,36 @@ class FileEntry:
 
         return True
 
+    @classmethod
+    def _validate(
+            cls,
+            root_id: UUID,
+            relative_path: Path,
+            filename: str,
+            file_size: int,
+            hash_base64: str,
+    ) -> None:
+
+        if not root_id:
+            raise InvalidFileEntryDataError(
+                "Root id cannot be empty"
+            )
+
+        cls._validate_relative_path(
+            relative_path
+        )
+
+        cls._validate_filename(
+            filename
+        )
+
+        cls._validate_file_size(
+            file_size
+        )
+
+        cls._validate_hash(
+            hash_base64
+        )
 
     @staticmethod
     def _validate_relative_path(
