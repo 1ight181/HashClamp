@@ -24,17 +24,6 @@ class Root:
         default_factory=uuid4,
     )
 
-    created_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    updated_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-
     class RootCreateOptions(TypedDict, total=False):
         scan_interval_minutes: int
 

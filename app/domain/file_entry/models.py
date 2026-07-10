@@ -48,20 +48,6 @@ class FileEntry:
         default=False,
     )
 
-    previous_hash: Optional[str] = field(
-        init=False,
-        default=None,
-    )
-
-    created_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    updated_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
 
 
     class FileEntryUpdateOptions(TypedDict, total=False):

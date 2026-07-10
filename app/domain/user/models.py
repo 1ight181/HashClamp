@@ -30,16 +30,6 @@ class User:
         default_factory=uuid4,
     )
 
-    created_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    updated_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
     is_active: bool = True
     is_superuser: bool = False
 

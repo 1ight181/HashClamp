@@ -38,17 +38,6 @@ class Node:
     max_roots: int = 50
     default_scan_interval_minutes: int = 30
 
-    created_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    updated_at: datetime = field(
-        init=False,
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-
     class NodeCreateOptions(TypedDict, total=False):
         hostname: str
         ip_addresses: list[str]
