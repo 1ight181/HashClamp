@@ -20,16 +20,16 @@ class SnapshotFileModel(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "root_id",
+            "snapshot_id",
             "relative_path",
             "filename",
             name="unique_file_entry_path",
         ),
     )
 
-    root_id: Mapped[UUID] = mapped_column(
+    snapshot_id: Mapped[UUID] = mapped_column(
         ForeignKey(
-            "roots.id",
+            "snapshot.id",
             ondelete="CASCADE",
         ),
         nullable=False,
