@@ -34,9 +34,9 @@ class Node(BaseEntity):
     default_scan_interval_minutes: int = 30
 
     class NodeOptions(TypedDict, total=False):
-        hostname: str
-        ip_addresses: list[str]
-        port: int
+        hostname: str | None
+        ip_addresses: list[str] | None
+        port: int | None
         max_roots: int
         default_scan_interval_minutes: int
 
