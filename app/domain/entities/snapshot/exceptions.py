@@ -1,10 +1,10 @@
-class FileEntryDomainError(Exception):
+class SnapshotDomainError(Exception):
     """Base exception for file entry domain errors."""
 
 
-class InvalidFileEntryDataError(FileEntryDomainError):
+class InvalidSnapshotDataError(SnapshotDomainError):
     """Raised when file entry creation violates domain invariants."""
 
 
-class InvalidFileEntryUpdateError(FileEntryDomainError):
+class InvalidSnapshotUpdateError(SnapshotDomainError):
     """Raised when file entry update violates domain invariants."""

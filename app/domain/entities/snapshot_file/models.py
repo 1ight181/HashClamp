@@ -1,16 +1,15 @@
 import base64
 import re
 
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TypedDict, Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
 from exceptions import (
-    InvalidFileEntryDataError,
-    InvalidFileEntryUpdateError,
+    InvalidSnapshotFileDataError,
+    InvalidSnapshotFileUpdateError,
 )
 
 
@@ -20,7 +19,7 @@ FILENAME_REGEX = re.compile(
 
 
 @dataclass
-class FileEntry(BaseEntity):
+class SnapshotFile(BaseEntity):
     root_id: UUID
 
     relative_path: Path
@@ -29,28 +28,11 @@ class FileEntry(BaseEntity):
     file_size: int
     hash_base64: str
 
-    last_modified_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    scanned_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc),
-    )
-
-    is_deleted: bool = False
-
     class FileEntryUpdateOptions(TypedDict, total=False):
         relative_path: Path
         filename: str
         file_size: int
         hash_base64: str
-        scanned_at: datetime
-        is_deleted: bool
-
-    class FileEntryRestoreOptions(TypedDict, total=False):
-        last_modified_at: datetime
-        scanned_at: datetime
-        is_deleted: bool
 
     @classmethod
     def create(
@@ -60,7 +42,7 @@ class FileEntry(BaseEntity):
             filename: str,
             file_size: int,
             hash_base64: str,
-    ) -> "FileEntry":
+    ) -> "SnapshotFile":
 
         cls._validate(
             root_id=root_id,
@@ -87,11 +69,10 @@ class FileEntry(BaseEntity):
             filename: str,
             file_size: int,
             hash_base64: str,
-            **kwargs: Unpack[FileEntryRestoreOptions],
-    ) -> "FileEntry":
+    ) -> "SnapshotFile":
 
         if not id:
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "File entry id cannot be empty"
             )
 
@@ -110,28 +91,25 @@ class FileEntry(BaseEntity):
             filename=filename,
             file_size=file_size,
             hash_base64=hash_base64,
-            **kwargs,
         )
 
     def update(
             self,
             **kwargs: Unpack[FileEntryUpdateOptions],
-    ) -> bool:
+    ):
 
         allowed_fields = {
             "relative_path",
             "filename",
             "file_size",
             "hash_base64",
-            "scanned_at",
-            "is_deleted",
         }
 
 
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidFileEntryUpdateError(
+            raise InvalidSnapshotFileUpdateError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -159,31 +137,13 @@ class FileEntry(BaseEntity):
         if hash_base64 is not None:
             self._validate_hash(hash_base64)
 
-
-        if not kwargs:
-            return False
-
-
         for key, value in kwargs.items():
-
             if key == "hash_base64":
-                self.previous_hash = self.hash_base64
-                self.last_modified_at = datetime.now(
-                    timezone.utc
+                setattr(
+                    self,
+                    key,
+                    value,
                 )
-
-            setattr(
-                self,
-                key,
-                value,
-            )
-
-
-        self.updated_at = datetime.now(
-            timezone.utc
-        )
-
-        return True
 
     @classmethod
     def _validate(
@@ -196,7 +156,7 @@ class FileEntry(BaseEntity):
     ) -> None:
 
         if not root_id:
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "Root id cannot be empty"
             )
 
@@ -222,7 +182,7 @@ class FileEntry(BaseEntity):
     ) -> None:
 
         if path.is_absolute():
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "Relative path must be non-absolute"
             )
 
@@ -233,7 +193,7 @@ class FileEntry(BaseEntity):
     ) -> None:
 
         if not FILENAME_REGEX.match(filename):
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "Filename is invalid"
             )
 
@@ -244,7 +204,7 @@ class FileEntry(BaseEntity):
     ) -> None:
 
         if file_size < 0:
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "File size must be non-negative"
             )
 
@@ -260,6 +220,6 @@ class FileEntry(BaseEntity):
                 validate=True,
             )
         except Exception:
-            raise InvalidFileEntryDataError(
+            raise InvalidSnapshotFileDataError(
                 "Hash is not a valid base64 string"
             )
