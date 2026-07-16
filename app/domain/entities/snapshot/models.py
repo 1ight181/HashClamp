@@ -30,7 +30,6 @@ class Snapshot(BaseEntity):
     def create(
             cls,
             root_id: UUID,
-            files_count: int = 0,
     ) -> "Snapshot":
 
         cls._validate(
@@ -50,7 +49,6 @@ class Snapshot(BaseEntity):
             id: UUID,
             root_id: UUID,
             status: SnapshotStatus,
-            files_count: int,
             created_at: datetime,
     ) -> "Snapshot":
 
