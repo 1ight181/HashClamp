@@ -5,11 +5,11 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.persistence.sqlalchemy.base import Base
+from app.infrastructure.persistence.sqlalchemy.models.base import Base
 
 if TYPE_CHECKING:
     from app.infrastructure.persistence.sqlalchemy.models.node import NodeModel
-    from app.infrastructure.persistence.sqlalchemy.models.file_entry import FileEntryModel
+    from app.infrastructure.persistence.sqlalchemy.models.snapshot_file import SnapshotFileModel
 
 
 class RootModel(Base):
@@ -46,18 +46,8 @@ class RootModel(Base):
         nullable=False,
     )
 
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        nullable=False,
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False,
-    )
-
-    file_entries: Mapped[list[FileEntryModel]] = relationship(
+    file_entries: Mapped[list[SnapshotFileModel]] = relationship(
         back_populates="root",
+        cascade="all, delete-orphan",
         passive_deletes=True
     )

@@ -1,7 +1,6 @@
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import (
     ForeignKey,
@@ -11,14 +10,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.infrastructure.persistence.sqlalchemy.base import Base
+from app.infrastructure.persistence.sqlalchemy.models.base import Base
 
 
 if TYPE_CHECKING:
     from app.infrastructure.persistence.sqlalchemy.models.root import RootModel
 
 
-class FileEntryModel(Base):
+class SnapshotFileModel(Base):
     __tablename__ = "file_entries"
 
     __table_args__ = (
@@ -62,27 +61,3 @@ class FileEntryModel(Base):
         nullable=False,
     )
 
-    last_modified_at: Mapped[datetime] = mapped_column(
-        nullable=False,
-    )
-
-    scanned_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        nullable=False,
-    )
-
-    is_deleted: Mapped[bool] = mapped_column(
-        default=False,
-        nullable=False,
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        nullable=False,
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False,
-    )
