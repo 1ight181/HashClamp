@@ -20,7 +20,7 @@ FILENAME_REGEX = re.compile(
 
 @dataclass
 class SnapshotFile(BaseEntity):
-    root_id: UUID
+    snapshot_id: UUID
 
     relative_path: Path
     filename: str
@@ -37,7 +37,7 @@ class SnapshotFile(BaseEntity):
     @classmethod
     def create(
             cls,
-            root_id: UUID,
+            snapshot_id: UUID,
             relative_path: Path,
             filename: str,
             file_size: int,
@@ -45,7 +45,7 @@ class SnapshotFile(BaseEntity):
     ) -> "SnapshotFile":
 
         cls._validate(
-            root_id=root_id,
+            snapshot_id=snapshot_id,
             relative_path=relative_path,
             filename=filename,
             file_size=file_size,
@@ -53,7 +53,7 @@ class SnapshotFile(BaseEntity):
         )
 
         return cls(
-            root_id=root_id,
+            snapshot_id=snapshot_id,
             relative_path=relative_path,
             filename=filename,
             file_size=file_size,
@@ -64,7 +64,7 @@ class SnapshotFile(BaseEntity):
     def restore(
             cls,
             id: UUID,
-            root_id: UUID,
+            snapshot_id: UUID,
             relative_path: Path,
             filename: str,
             file_size: int,
@@ -77,7 +77,7 @@ class SnapshotFile(BaseEntity):
             )
 
         cls._validate(
-            root_id=root_id,
+            snapshot_id=snapshot_id,
             relative_path=relative_path,
             filename=filename,
             file_size=file_size,
@@ -86,7 +86,7 @@ class SnapshotFile(BaseEntity):
 
         return cls(
             id=id,
-            root_id=root_id,
+            snapshot_id=snapshot_id,
             relative_path=relative_path,
             filename=filename,
             file_size=file_size,
@@ -148,14 +148,14 @@ class SnapshotFile(BaseEntity):
     @classmethod
     def _validate(
             cls,
-            root_id: UUID,
+            snapshot_id: UUID,
             relative_path: Path,
             filename: str,
             file_size: int,
             hash_base64: str,
     ) -> None:
 
-        if not root_id:
+        if not snapshot_id:
             raise InvalidSnapshotFileDataError(
                 "Root id cannot be empty"
             )
