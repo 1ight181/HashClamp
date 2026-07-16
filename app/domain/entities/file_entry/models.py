@@ -4,10 +4,10 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, TypedDict, Unpack
-from uuid import UUID, uuid4
+from typing import TypedDict, Unpack
+from uuid import UUID
 
-from app.domain.base.base import BaseEntity
+from app.domain.entities.base import BaseEntity
 from exceptions import (
     InvalidFileEntryDataError,
     InvalidFileEntryUpdateError,

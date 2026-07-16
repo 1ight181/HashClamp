@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.domain.node.models import Node
+from app.domain.entities.node.models import Node
 from app.domain.repositories.base import BaseRepository
 
 

@@ -1,7 +1,7 @@
-from typing import Protocol, Optional
+from typing import Optional
 
 from app.domain.repositories.base import BaseRepository
-from app.domain.user.models import User
+from app.domain.entities.user.models import User
 
 
 class UserRepository(BaseRepository[User]):

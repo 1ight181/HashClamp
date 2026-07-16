@@ -1,9 +1,9 @@
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TypedDict, Unpack
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from app.domain.base.base import BaseEntity
+from app.domain.entities.base import BaseEntity
 from exceptions import (
     InvalidRootDataError,
     InvalidRootUpdateError,
