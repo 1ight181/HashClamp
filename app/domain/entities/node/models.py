@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, TypedDict, Unpack
+from typing import TypedDict, Unpack
 from uuid import UUID
 
 import ipaddress
@@ -26,9 +26,9 @@ class Node(BaseEntity):
 
     user_id: UUID
 
-    hostname: Optional[str] = None
-    ip_addresses: Optional[list[str]] = None
-    port: Optional[int] = None
+    hostname: str | None
+    ip_addresses: list[str] | None
+    port: int | None
 
     max_roots: int = 50
     default_scan_interval_minutes: int = 30
@@ -195,7 +195,7 @@ class Node(BaseEntity):
             os_type: str,
             os_version: str,
             user_id: UUID,
-            **kwargs: Unpack[NodeCreateOptions],
+            **kwargs: Unpack[NodeOptions],
     ) -> None:
 
         cls._validate_name(name)

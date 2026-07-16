@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, TypedDict, Unpack
+from typing import TypedDict, Unpack
 from uuid import UUID
 
 import re
@@ -23,7 +23,7 @@ class User(BaseEntity):
 
     password_hash: str
 
-    fullname: Optional[str] = None
+    fullname: str | None = None
 
     is_active: bool = True
     is_superuser: bool = False
@@ -31,11 +31,11 @@ class User(BaseEntity):
     default_scan_interval_minutes: int = 30
     max_nodes: int = 5
     should_notify_on_changes: bool = False
-    notification_email: Optional[str] = None
+    notification_email: str | None = None
 
 
     class UserCreateOptions(TypedDict, total=False):
-        fullname: str
+        fullname: str | None
         notification_email: str
         should_notify_on_changes: bool
         default_scan_interval_minutes: int
@@ -213,8 +213,8 @@ class User(BaseEntity):
             setattr(self, key, value)
 
     class UserRestoreOptions(TypedDict, total=False):
-        fullname: str
-        notification_email: str
+        fullname: str | None
+        notification_email: str | None
         should_notify_on_changes: bool
         default_scan_interval_minutes: int
         max_nodes: int
@@ -362,7 +362,7 @@ class User(BaseEntity):
     @staticmethod
     def _validate_notifications(
             should_notify: bool,
-            notification_email: Optional[str],
+            notification_email: str | None,
     ) -> None:
 
         if should_notify and not notification_email:
