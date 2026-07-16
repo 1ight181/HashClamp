@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 import ipaddress
 import re
 
+from app.domain.base.base import BaseEntity
 from exceptions import (
     InvalidNodeDataError,
     InvalidNodeUpdateError,
@@ -18,17 +19,13 @@ HOSTNAME_REGEX = re.compile(
 
 
 @dataclass
-class Node:
+class Node(BaseEntity):
     name: str
 
     os_type: str
     os_version: str
 
     user_id: UUID
-
-    id: UUID = field(
-        default_factory=uuid4,
-    )
 
     hostname: Optional[str] = None
     ip_addresses: Optional[list[str]] = None

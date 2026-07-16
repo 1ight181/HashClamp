@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import TypedDict, Unpack
 from uuid import UUID, uuid4
 
+from app.domain.base.base import BaseEntity
 from exceptions import (
     InvalidRootDataError,
     InvalidRootUpdateError,
@@ -10,17 +11,13 @@ from exceptions import (
 
 
 @dataclass
-class Root:
+class Root(BaseEntity):
     path: Path
     alias: str
 
     node_id: UUID
 
     scan_interval_minutes: int
-
-    id: UUID = field(
-        default_factory=uuid4,
-    )
 
     @classmethod
     def create(

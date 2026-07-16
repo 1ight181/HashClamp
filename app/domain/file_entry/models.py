@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional, TypedDict, Unpack
 from uuid import UUID, uuid4
 
+from app.domain.base.base import BaseEntity
 from exceptions import (
     InvalidFileEntryDataError,
     InvalidFileEntryUpdateError,
@@ -19,7 +20,7 @@ FILENAME_REGEX = re.compile(
 
 
 @dataclass
-class FileEntry:
+class FileEntry(BaseEntity):
     root_id: UUID
 
     relative_path: Path
@@ -27,10 +28,6 @@ class FileEntry:
 
     file_size: int
     hash_base64: str
-
-    id: UUID = field(
-        default_factory=uuid4,
-    )
 
     last_modified_at: datetime = field(
         default_factory=lambda: datetime.now(timezone.utc),

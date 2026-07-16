@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 import re
 
+from app.domain.base.base import BaseEntity
 from exceptions import (
     InvalidUserDataError,
     InvalidUserUpdateError,
@@ -17,17 +18,13 @@ EMAIL_REGEX = re.compile(
 
 
 @dataclass
-class User:
+class User(BaseEntity):
     username: str
     email: str
 
     password_hash: str
 
     fullname: Optional[str] = None
-
-    id: UUID = field(
-        default_factory=uuid4,
-    )
 
     is_active: bool = True
     is_superuser: bool = False
