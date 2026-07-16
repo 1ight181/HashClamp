@@ -30,11 +30,6 @@ class FileEntryModel(Base):
         ),
     )
 
-    id: Mapped[UUID] = mapped_column(
-        primary_key=True,
-        default=uuid4,
-    )
-
     root_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "roots.id",

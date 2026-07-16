@@ -20,11 +20,6 @@ if TYPE_CHECKING:
 class NodeModel(Base):
     __tablename__ = "nodes"
 
-    id: Mapped[UUID] = mapped_column(
-        primary_key=True,
-        default=uuid4,
-    )
-
     name: Mapped[str] = mapped_column(
         String(255),
         nullable=False,

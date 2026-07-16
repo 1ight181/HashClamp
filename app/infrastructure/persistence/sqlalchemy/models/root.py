@@ -15,11 +15,6 @@ if TYPE_CHECKING:
 class RootModel(Base):
     __tablename__ = "roots"
 
-    id: Mapped[UUID] = mapped_column(
-        primary_key=True,
-        default=uuid4,
-    )
-
     path: Mapped[str] = mapped_column(
         String(1024),
         nullable=False,
