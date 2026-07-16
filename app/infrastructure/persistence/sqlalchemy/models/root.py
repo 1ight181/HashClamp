@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -57,4 +57,7 @@ class RootModel(Base):
         nullable=False,
     )
 
-    file_entries: Mapped[list[FileEntryModel]] = mapped_column()
+    file_entries: Mapped[list[FileEntryModel]] = relationship(
+        back_populates="root",
+        passive_deletes=True
+    )
