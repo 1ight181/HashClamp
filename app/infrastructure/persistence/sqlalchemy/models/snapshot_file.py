@@ -37,7 +37,7 @@ class SnapshotFileModel(Base):
     )
 
     root: Mapped["RootModel"] = relationship(
-        back_populates="files",
+        back_populates="snapshot_files",
     )
 
     relative_path: Mapped[str] = mapped_column(

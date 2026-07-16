@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.persistence.sqlalchemy.models.base import Base
@@ -14,18 +14,30 @@ if TYPE_CHECKING:
 class RootModel(Base):
     __tablename__ = "roots"
 
+    __table_args__ = (
+        UniqueConstraint(
+            "node_id",
+            "path",
+            name="uq_root_node_id_path",
+        ),
+
+        UniqueConstraint(
+            "node_id",
+            "alias",
+            name="uq_root_node_id_alias",
+        )
+    )
+
     path: Mapped[str] = mapped_column(
         String(1024),
         nullable=False,
         index=True,
-        unique=True,
     )
 
     alias: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
         index=True,
-        unique=True,
     )
 
     node_id: Mapped[UUID] = mapped_column(
@@ -45,7 +57,7 @@ class RootModel(Base):
         nullable=False,
     )
 
-    file_entries: Mapped[list[SnapshotFileModel]] = relationship(
+    snapshot_files: Mapped[list[SnapshotFileModel]] = relationship(
         back_populates="root",
         cascade="all, delete-orphan",
         passive_deletes=True
