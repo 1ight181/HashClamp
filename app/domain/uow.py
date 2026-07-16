@@ -1,0 +1,9 @@
+from contextlib import asynccontextmanager
+from typing import Protocol
+
+class UnitOfWork(Protocol):
+    @asynccontextmanager
+    async def __aenter__(self): ...
+
+    async def commit(self): ...
+    async def rollback(self): ...
