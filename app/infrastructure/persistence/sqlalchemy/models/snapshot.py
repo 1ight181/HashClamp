@@ -48,7 +48,7 @@ class SnapshotModel(Base):
     )
 
 
-    files: Mapped[list["SnapshotFileModel"]] = relationship(
+    snapshot_files: Mapped[list["SnapshotFileModel"]] = relationship(
         back_populates="snapshot",
         cascade="all, delete-orphan",
         passive_deletes=True,

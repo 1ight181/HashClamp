@@ -12,11 +12,11 @@ from app.infrastructure.persistence.sqlalchemy.models.base import Base
 
 
 if TYPE_CHECKING:
-    from app.infrastructure.persistence.sqlalchemy.models.root import RootModel
+    from app.infrastructure.persistence.sqlalchemy.models.snapshot import SnapshotModel
 
 
 class SnapshotFileModel(Base):
-    __tablename__ = "file_entries"
+    __tablename__ = "snapshot_files"
 
     __table_args__ = (
         UniqueConstraint(
@@ -36,7 +36,7 @@ class SnapshotFileModel(Base):
         index=True,
     )
 
-    root: Mapped["RootModel"] = relationship(
+    snapshot: Mapped["SnapshotModel"] = relationship(
         back_populates="snapshot_files",
     )
 

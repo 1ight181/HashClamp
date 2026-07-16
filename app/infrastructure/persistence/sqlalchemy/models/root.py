@@ -8,7 +8,7 @@ from app.infrastructure.persistence.sqlalchemy.models.base import Base
 
 if TYPE_CHECKING:
     from app.infrastructure.persistence.sqlalchemy.models.node import NodeModel
-    from app.infrastructure.persistence.sqlalchemy.models.snapshot_file import SnapshotFileModel
+    from app.infrastructure.persistence.sqlalchemy.models.snapshot import SnapshotModel
 
 
 class RootModel(Base):
@@ -57,7 +57,7 @@ class RootModel(Base):
         nullable=False,
     )
 
-    snapshot_files: Mapped[list[SnapshotFileModel]] = relationship(
+    snapshot: Mapped[list[SnapshotModel]] = relationship(
         back_populates="root",
         cascade="all, delete-orphan",
         passive_deletes=True
