@@ -20,7 +20,8 @@ class Settings(BaseSettings):
     debug: bool = True
     database_dsn: str
 
-    user_settings: UserSettings 
+    user_settings: UserSettings = UserSettings()
+
 
 settings = Settings()
 
