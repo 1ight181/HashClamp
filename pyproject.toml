@@ -9,7 +9,8 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "sqlalchemy",
-    "alembic"
+    "alembic",
+    "asyncpg",
 ]
 
 [project.optional-dependencies]
