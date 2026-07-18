@@ -20,6 +20,29 @@ class UserService:
 
         return user
 
+    async def create_user(self, user: User) -> User:
+        try:
+            await self._repo.save(user)
+        except EntityAlreadyExistsError:
+            raise
+
+        return user
+
+    async def update_user(self, user: User) -> User:
+        try:
+            await self._repo.save(user)
+        except EntityAlreadyExistsError:
+            raise
+
+        return user
+
+    async def delete_user(self, user_id: UUID):
+        if not await self._repo.delete(user_id):
+            raise UserNotFoundError(user_id)
+
+
+
+
 
 
 
