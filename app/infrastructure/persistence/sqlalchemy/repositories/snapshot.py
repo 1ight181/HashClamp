@@ -22,21 +22,6 @@ from app.infrastructure.persistence.sqlalchemy.repositories.base import (
     SqlAlchemyBaseRepository,
 )
 
-
-def _snapshot_file_to_domain(
-        orm: SnapshotFileModel,
-) -> SnapshotFile:
-
-    return SnapshotFile.restore(
-        id=orm.id,
-        snapshot_id=orm.snapshot_id,
-        relative_path=Path(orm.relative_path),
-        filename=orm.filename,
-        file_size=orm.file_size,
-        hash_base64=orm.hash_base64,
-    )
-
-
 class SqlAlchemySnapshotRepository(
     SnapshotRepository,
     SqlAlchemyBaseRepository[Snapshot, SnapshotModel],
@@ -183,7 +168,7 @@ class SqlAlchemySnapshotRepository(
         )
 
         return [
-            _snapshot_file_to_domain(file)
+            self._snapshot_file_to_domain(file)
             for file in result.scalars().all()
         ]
 
@@ -225,3 +210,16 @@ class SqlAlchemySnapshotRepository(
         orm.root_id = domain.root_id
         orm.status = domain.status.value
         orm.created_at = domain.created_at
+
+    @staticmethod
+    def _snapshot_file_to_domain(
+            orm: SnapshotFileModel,
+    ) -> SnapshotFile:
+        return SnapshotFile.restore(
+            id=orm.id,
+            snapshot_id=orm.snapshot_id,
+            relative_path=Path(orm.relative_path),
+            filename=orm.filename,
+            file_size=orm.file_size,
+            hash_base64=orm.hash_base64,
+        )
