@@ -4,6 +4,7 @@ from sqlalchemy import select
 
 from app.domain.entities.node.models import Node
 from app.domain.repositories.node import NodeRepository
+from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.node import NodeModel
 from app.infrastructure.persistence.sqlalchemy.repositories.base import (
     SqlAlchemyBaseRepository,
@@ -14,8 +15,16 @@ class SqlAlchemyNodeRepository(
     NodeRepository,
     SqlAlchemyBaseRepository[Node, NodeModel],
 ):
-    def __init__(self, session):
-        super().__init__(session, NodeModel)
+    def __init__(
+        self,
+        session,
+        constraint_registry: ConstraintRegistry,
+    ):
+        super().__init__(
+            session,
+            NodeModel,
+            constraint_registry,
+        )
 
     async def get_all_by_user_id(
         self,

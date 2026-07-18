@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from app.domain.entities.root.models import Root
 from app.domain.repositories.root import RootRepository
+from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.root import RootModel
 from app.infrastructure.persistence.sqlalchemy.repositories.base import (
     SqlAlchemyBaseRepository,
@@ -15,8 +16,16 @@ class SqlAlchemyRootRepository(
     RootRepository,
     SqlAlchemyBaseRepository[Root, RootModel],
 ):
-    def __init__(self, session):
-        super().__init__(session, RootModel)
+    def __init__(
+        self,
+        session,
+        constraint_registry: ConstraintRegistry,
+    ):
+        super().__init__(
+            session,
+            RootModel,
+            constraint_registry,
+        )
 
     async def get_all_by_node_id(
         self,

@@ -1,7 +1,7 @@
 from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import select, func, desc, insert
+from sqlalchemy import select, func, insert
 
 from app.domain.entities.snapshot.models import (
     Snapshot,
@@ -9,6 +9,7 @@ from app.domain.entities.snapshot.models import (
 )
 from app.domain.entities.snapshot_file.models import SnapshotFile
 from app.domain.repositories.snapshot import SnapshotRepository
+from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 
 from app.infrastructure.persistence.sqlalchemy.models.snapshot import (
     SnapshotModel,
@@ -41,10 +42,15 @@ class SqlAlchemySnapshotRepository(
     SqlAlchemyBaseRepository[Snapshot, SnapshotModel],
 ):
 
-    def __init__(self, session):
+    def __init__(
+        self,
+        session,
+        constraint_registry: ConstraintRegistry,
+    ):
         super().__init__(
             session,
             SnapshotModel,
+            constraint_registry
         )
 
 

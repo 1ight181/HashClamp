@@ -2,13 +2,21 @@ from sqlalchemy import select
 
 from app.domain.entities.user.models import User
 from app.domain.repositories.user import UserRepository
+from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.user import UserModel
 from app.infrastructure.persistence.sqlalchemy.repositories.base import SqlAlchemyBaseRepository
 
 
 class SqlAlchemyUserRepository(UserRepository, SqlAlchemyBaseRepository[User, UserModel]):
-    def __init__(self, session):
-        super().__init__(session, UserModel)
+    def __init__(
+        self,
+        session,
+        constraint_registry: ConstraintRegistry,
+    ):
+        super().__init__(
+            session, UserModel,
+            constraint_registry,
+        )
 
     async def get_by_username(self, username: str) -> User | None:
         result = await self.session.execute(
