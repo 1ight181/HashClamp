@@ -23,7 +23,7 @@ class SnapshotFileModel(Base):
             "snapshot_id",
             "relative_path",
             "filename",
-            name="unique_file_entry_path",
+            name="unique_snapshot_files_relative_path_filename",
         ),
     )
 

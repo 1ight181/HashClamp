@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import (
     ForeignKey,
     String,
-    func,
+    func, UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 class SnapshotModel(Base):
     __tablename__ = "snapshots"
 
-
     root_id: Mapped[UUID] = mapped_column(
         ForeignKey(
             "roots.id",
@@ -30,11 +29,9 @@ class SnapshotModel(Base):
         index=True,
     )
 
-
     root: Mapped["RootModel"] = relationship(
         back_populates="snapshots",
     )
-
 
     status: Mapped[str] = mapped_column(
         String(50),
@@ -46,7 +43,6 @@ class SnapshotModel(Base):
         server_default=func.now(),
         nullable=False,
     )
-
 
     snapshot_files: Mapped[list["SnapshotFileModel"]] = relationship(
         back_populates="snapshot",

@@ -18,13 +18,13 @@ class RootModel(Base):
         UniqueConstraint(
             "node_id",
             "path",
-            name="uq_root_node_id_path",
+            name="uq_roots_node_id_path",
         ),
 
         UniqueConstraint(
             "node_id",
             "alias",
-            name="uq_root_node_id_alias",
+            name="uq_roots_node_id_alias",
         )
     )
 
