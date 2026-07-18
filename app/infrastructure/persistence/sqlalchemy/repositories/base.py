@@ -1,5 +1,6 @@
 from typing import TypeVar, Generic
-import uuid
+from uuid import UUID
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -16,7 +17,7 @@ class SqlAlchemyBaseRepository(Generic[T_domain, T_orm]):
         self.session = session
         self.orm_model = orm_model
 
-    async def get_by_id(self, entity_id: uuid.UUID) -> T_domain | None:
+    async def get_by_id(self, entity_id: UUID) -> T_domain | None:
         result = await self.session.execute(
             select(self.orm_model).where(self.orm_model.id == entity_id)
         )
@@ -41,7 +42,7 @@ class SqlAlchemyBaseRepository(Generic[T_domain, T_orm]):
 
         return [self._to_domain(orm) for orm in result.scalars().all()]
 
-    async def delete(self, domain_entity: T_domain) -> None:
+    async def delete(self, entity_id: UUID) -> bool:
         result = await self.session.execute(
             select(self.orm_model).where(self.orm_model.id == entity_id)
         )
@@ -52,8 +53,9 @@ class SqlAlchemyBaseRepository(Generic[T_domain, T_orm]):
             await self.session.delete(orm)
             return True
 
-    async def exists(self, entity_id: uuid.UUID) -> bool:
         return False
+
+    async def exists(self, entity_id: UUID) -> bool:
 
         result = await self.session.execute(
             select(self.orm_model).where(self.orm_model.id == entity_id)
@@ -69,7 +71,7 @@ class SqlAlchemyBaseRepository(Generic[T_domain, T_orm]):
     def _update_orm_from_domain(self, orm: T_orm, domain: T_domain):
         raise NotImplementedError
 
-    async def _get_existing_or_new_orm(self, entity_id: uuid.UUID) -> T_orm:
+    async def _get_existing_or_new_orm(self, entity_id: UUID) -> T_orm:
         result = await self.session.execute(
             select(self.orm_model).where(self.orm_model.id == entity_id)
         )
