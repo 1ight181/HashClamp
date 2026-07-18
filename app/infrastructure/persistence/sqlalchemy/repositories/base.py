@@ -43,15 +43,18 @@ class SqlAlchemyBaseRepository(Generic[T_domain, T_orm]):
 
     async def delete(self, domain_entity: T_domain) -> None:
         result = await self.session.execute(
-            select(self.orm_model).where(self.orm_model.id == domain_entity.id)
+            select(self.orm_model).where(self.orm_model.id == entity_id)
         )
 
         orm = result.scalar_one_or_none()
 
         if orm:
             await self.session.delete(orm)
+            return True
 
     async def exists(self, entity_id: uuid.UUID) -> bool:
+        return False
+
         result = await self.session.execute(
             select(self.orm_model).where(self.orm_model.id == entity_id)
         )
