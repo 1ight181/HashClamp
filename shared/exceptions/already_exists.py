@@ -10,27 +10,30 @@ from app.domain.entities.user.models import User
 
 EntityType = TypeVar("EntityType", bound=BaseEntity)
 
-
 class EntityAlreadyExistsError(Exception):
     def __init__(
         self,
         entity_type: Type[EntityType],
-        field: str | None = None,
-        value: Any | None = None,
+        fields: dict[str, Any] | None = None,
         message: str | None = None,
     ):
         self.entity_type = entity_type
-        self.field = field
-        self.value = value
+        self.fields = fields
         self.message = message or self._build_message()
 
         super().__init__(self.message)
 
     def _build_message(self) -> str:
-        if self.field is not None:
+        if self.fields is not None:
+            values = ", ".join(
+                f"{field}={value}"
+                for field, value in self.fields
+            )
+
             return (
+                # "User with email=jane@gmail.com, username=jane already exists"
                 f"{self.entity_type.__name__} "
-                f"with {self.field}='{self.value}' already exists"
+                f"with {values} already exists"
             )
 
         return f"{self.entity_type.__name__} already exists"
@@ -39,8 +42,7 @@ class EntityAlreadyExistsError(Exception):
         return {
             "error": "EntityAlreadyExists",
             "entity_type": self.entity_type.__name__,
-            "field": self.field,
-            "value": self.value,
+            "fields": self.fields,
             "error_message": self.message,
         }
 
@@ -49,25 +51,25 @@ class EntityAlreadyExistsError(Exception):
 
 
 class UserAlreadyExistsError(EntityAlreadyExistsError):
-    def __init__(self, field: str, value: object):
-        super().__init__(User, field, value)
+    def __init__(self, fields: dict[str, Any]):
+        super().__init__(User, fields)
 
 
 class NodeAlreadyExistsError(EntityAlreadyExistsError):
-    def __init__(self, field: str, value: object):
-        super().__init__(Node, field, value)
+    def __init__(self, fields: dict[str, Any]):
+        super().__init__(Node, fields)
 
 
 class RootAlreadyExistsError(EntityAlreadyExistsError):
-    def __init__(self, field: str, value: object):
-        super().__init__(Root, field, value)
+    def __init__(self, fields: dict[str, Any]):
+        super().__init__(Root, fields)
 
 
 class SnapshotAlreadyExistsError(EntityAlreadyExistsError):
-    def __init__(self, field: str, value: object):
-        super().__init__(Snapshot, field, value)
+    def __init__(self, fields: dict[str, Any]):
+        super().__init__(Snapshot, fields)
 
 
 class SnapshotFileAlreadyExistsError(EntityAlreadyExistsError):
-    def __init__(self, field: str, value: object):
-        super().__init__(SnapshotFile, field, value)
+    def __init__(self, field: dict[str, Any]):
+        super().__init__(SnapshotFile, field)
