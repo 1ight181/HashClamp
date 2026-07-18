@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.infrastructure.persistence.sqlalchemy.db import Database
-from app.core.config import settings
+from app.config import settings
 
 
 @asynccontextmanager
