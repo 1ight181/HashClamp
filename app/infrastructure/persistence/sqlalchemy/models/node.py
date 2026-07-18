@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import (
     ForeignKey,
-    String,
+    String, UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,6 +17,14 @@ if TYPE_CHECKING:
 
 class NodeModel(Base):
     __tablename__ = "nodes"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "name",
+            name="unique_nodes_user_id_name",
+        )
+    )
 
     name: Mapped[str] = mapped_column(
         String(255),
