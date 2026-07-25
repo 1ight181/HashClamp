@@ -33,6 +33,7 @@ class UserCreateRequest(BaseModel):
 class UserUpdateRequest(BaseModel):
     username: str | None = Field(default=None, min_length=3)
     email: EmailStr | None = None
+    password: str = Field(min_length=4, max_length=20)
 
     should_notify_on_changes: bool | None = None
     notification_email: EmailStr | None = None
