@@ -3,9 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.services.user import UserService
 from app.domain.repositories.user import UserRepository
+from app.domain.security import PasswordHasher
 from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.repositories.user import SqlAlchemyUserRepository
 from app.presentation.http.v1.deps.constraints import get_constraint_registry
+from app.presentation.http.v1.deps.security import get_password_hasher
 from app.presentation.http.v1.deps.session import get_session
 
 
@@ -17,5 +19,6 @@ def get_user_repo(
 
 def get_user_service(
     repo: UserRepository = Depends(get_user_repo),
+    password_hasher: PasswordHasher = Depends(get_password_hasher)
 ):
-    return UserService(repo)
+    return UserService(repo, password_hasher)
