@@ -7,11 +7,7 @@ from typing import TypedDict, Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
-from exceptions import (
-    InvalidSnapshotFileDataError,
-    InvalidSnapshotFileUpdateError,
-)
-
+from app.domain.entities.snapshot_file.exceptions import SnapshotFileInvalidDataError
 
 FILENAME_REGEX = re.compile(
     r'^[^\\/:*?"<>|]+$'
@@ -72,7 +68,7 @@ class SnapshotFile(BaseEntity):
     ) -> "SnapshotFile":
 
         if not id:
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "File entry id cannot be empty"
             )
 
@@ -109,7 +105,7 @@ class SnapshotFile(BaseEntity):
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidSnapshotFileUpdateError(
+            raise SnapshotFileInvalidDataError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -156,7 +152,7 @@ class SnapshotFile(BaseEntity):
     ) -> None:
 
         if not snapshot_id:
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "Root id cannot be empty"
             )
 
@@ -182,7 +178,7 @@ class SnapshotFile(BaseEntity):
     ) -> None:
 
         if path.is_absolute():
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "Relative path must be non-absolute"
             )
 
@@ -193,7 +189,7 @@ class SnapshotFile(BaseEntity):
     ) -> None:
 
         if not FILENAME_REGEX.match(filename):
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "Filename is invalid"
             )
 
@@ -204,7 +200,7 @@ class SnapshotFile(BaseEntity):
     ) -> None:
 
         if file_size < 0:
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "File size must be non-negative"
             )
 
@@ -220,6 +216,6 @@ class SnapshotFile(BaseEntity):
                 validate=True,
             )
         except Exception:
-            raise InvalidSnapshotFileDataError(
+            raise SnapshotFileInvalidDataError(
                 "Hash is not a valid base64 string"
             )

@@ -5,10 +5,7 @@ from typing import TypedDict, Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
-from exceptions import (
-    InvalidSnapshotDataError,
-    InvalidSnapshotUpdateError,
-)
+from app.domain.entities.snapshot.exceptions import SnapshotInvalidDataError
 
 
 class SnapshotStatus(str, Enum):
@@ -53,7 +50,7 @@ class Snapshot(BaseEntity):
     ) -> "Snapshot":
 
         if not id:
-            raise InvalidSnapshotDataError(
+            raise SnapshotInvalidDataError(
                 "Snapshot id cannot be empty"
             )
 
@@ -85,7 +82,7 @@ class Snapshot(BaseEntity):
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidSnapshotUpdateError(
+            raise SnapshotInvalidDataError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -112,7 +109,7 @@ class Snapshot(BaseEntity):
     ) -> None:
 
         if not root_id:
-            raise InvalidSnapshotDataError(
+            raise SnapshotInvalidDataError(
                 "Snapshot root id cannot be empty"
             )
 
@@ -131,7 +128,7 @@ class Snapshot(BaseEntity):
     ) -> None:
 
         if not isinstance(status, SnapshotStatus):
-            raise InvalidSnapshotDataError(
+            raise SnapshotInvalidDataError(
                 "Snapshot status is invalid"
             )
 
@@ -142,6 +139,6 @@ class Snapshot(BaseEntity):
     ) -> None:
 
         if created_at.tzinfo is None:
-            raise InvalidSnapshotDataError(
+            raise SnapshotInvalidDataError(
                 "Created at must contain timezone information"
             )

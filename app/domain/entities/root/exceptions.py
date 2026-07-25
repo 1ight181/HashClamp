@@ -1,10 +1,8 @@
-class RootDomainError(Exception):
-    """Base exception for root domain errors."""
+from app.domain.entities.exceptions import DomainInvalidDataError
+from app.domain.entities.root.models import Root
 
 
-class InvalidRootDataError(RootDomainError):
+class RootInvalidDataError(DomainInvalidDataError):
     """Raised when root creation violates domain invariants."""
-
-
-class InvalidRootUpdateError(RootDomainError):
-    """Raised when root update violates domain invariants."""
+    def __init__(self, message: str):
+        super().__init__(Root, message)

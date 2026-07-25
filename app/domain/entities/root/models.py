@@ -5,8 +5,7 @@ from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
 from exceptions import (
-    InvalidRootDataError,
-    InvalidRootUpdateError,
+    RootInvalidDataError
 )
 
 
@@ -53,7 +52,7 @@ class Root(BaseEntity):
     ) -> "Root":
 
         if not id:
-            raise InvalidRootDataError(
+            raise RootInvalidDataError(
                 "Root id cannot be empty"
             )
 
@@ -94,7 +93,7 @@ class Root(BaseEntity):
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidRootUpdateError(
+            raise RootInvalidDataError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -137,7 +136,7 @@ class Root(BaseEntity):
         cls._validate_alias(alias)
 
         if not node_id:
-            raise InvalidRootDataError(
+            raise RootInvalidDataError(
                 "Root node id cannot be empty"
             )
 
@@ -148,7 +147,7 @@ class Root(BaseEntity):
     @staticmethod
     def _validate_path(path: Path) -> None:
         if not path.is_absolute():
-            raise InvalidRootDataError(
+            raise RootInvalidDataError(
                 f"Root path {path} is not absolute"
             )
 
@@ -156,7 +155,7 @@ class Root(BaseEntity):
     @staticmethod
     def _validate_alias(alias: str) -> None:
         if not alias.strip():
-            raise InvalidRootDataError(
+            raise RootInvalidDataError(
                 "Root alias cannot be empty"
             )
 
@@ -167,6 +166,6 @@ class Root(BaseEntity):
     ) -> None:
 
         if scan_interval_minutes <= 0:
-            raise InvalidRootDataError(
+            raise RootInvalidDataError(
                 "Scan interval must be positive"
             )

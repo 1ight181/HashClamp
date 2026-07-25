@@ -5,10 +5,8 @@ from uuid import UUID
 import re
 
 from app.domain.entities.base import BaseEntity
-from exceptions import (
-    InvalidUserDataError,
-    InvalidUserUpdateError,
-)
+from exceptions import UserInvalidDataError
+
 
 
 EMAIL_REGEX = re.compile(
@@ -142,7 +140,7 @@ class User(BaseEntity):
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidUserUpdateError(
+            raise UserInvalidDataError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -204,8 +202,8 @@ class User(BaseEntity):
                 )
 
 
-        except InvalidUserDataError as error:
-            raise InvalidUserUpdateError(
+        except UserInvalidDataError as error:
+            raise UserInvalidDataError(
                 str(error)
             )
 
@@ -232,7 +230,7 @@ class User(BaseEntity):
     ) -> "User":
 
         if not id:
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "User id cannot be empty"
             )
 
@@ -302,7 +300,7 @@ class User(BaseEntity):
     ) -> None:
 
         if len(username.strip()) < 3:
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Username must be at least 3 characters long"
             )
 
@@ -317,11 +315,11 @@ class User(BaseEntity):
             email.strip()
         ):
             if notification:
-                raise InvalidUserDataError(
+                raise UserInvalidDataError(
                     "Notification email address is invalid"
                 )
 
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Email address is invalid"
             )
 
@@ -332,7 +330,7 @@ class User(BaseEntity):
     ) -> None:
 
         if not password_hash.strip():
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Password hash cannot be empty"
             )
 
@@ -343,7 +341,7 @@ class User(BaseEntity):
     ) -> None:
 
         if scan_interval_minutes <= 0:
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Default scan interval minutes must be positive"
             )
 
@@ -354,7 +352,7 @@ class User(BaseEntity):
     ) -> None:
 
         if max_nodes <= 0:
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Max nodes must be positive"
             )
 
@@ -366,6 +364,6 @@ class User(BaseEntity):
     ) -> None:
 
         if should_notify and not notification_email:
-            raise InvalidUserDataError(
+            raise UserInvalidDataError(
                 "Notification email is required when notifications are enabled"
             )

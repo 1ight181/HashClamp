@@ -1,10 +1,10 @@
-class SnapshotDomainError(Exception):
-    """Base exception for file entry domain errors."""
+from app.domain.entities.exceptions import DomainInvalidDataError
+from app.domain.entities.snapshot.models import Snapshot
 
 
-class InvalidSnapshotDataError(SnapshotDomainError):
+class SnapshotInvalidDataError(DomainInvalidDataError):
     """Raised when file entry creation violates domain invariants."""
 
+    def __init__(self, message: str):
+        super().__init__(Snapshot, message)
 
-class InvalidSnapshotUpdateError(SnapshotDomainError):
-    """Raised when file entry update violates domain invariants."""

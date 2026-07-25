@@ -7,7 +7,7 @@ import re
 
 from app.domain.entities.base import BaseEntity
 from exceptions import (
-    InvalidNodeDataError,
+    NodeInvalidDataError,
     InvalidNodeUpdateError,
 )
 
@@ -78,7 +78,7 @@ class Node(BaseEntity):
     ) -> "Node":
 
         if not id:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Node id cannot be empty"
             )
 
@@ -178,7 +178,7 @@ class Node(BaseEntity):
                 self._validate_scan_interval(scan_interval)
 
 
-        except InvalidNodeDataError as error:
+        except NodeInvalidDataError as error:
             raise InvalidNodeUpdateError(
                 str(error)
             )
@@ -205,7 +205,7 @@ class Node(BaseEntity):
         cls._validate_os_version(os_version)
 
         if not user_id:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "User id cannot be empty"
             )
 
@@ -257,7 +257,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_name(name: str) -> None:
         if len(name.strip()) < 3:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Name must be at least 3 characters long"
             )
 
@@ -265,7 +265,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_os_type(os_type: str) -> None:
         if not os_type.strip():
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "OS type cannot be empty"
             )
 
@@ -273,7 +273,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_os_version(os_version: str) -> None:
         if not os_version.strip():
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "OS version cannot be empty"
             )
 
@@ -281,7 +281,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_hostname(hostname: str) -> None:
         if not HOSTNAME_REGEX.match(hostname):
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Hostname is invalid"
             )
 
@@ -295,7 +295,7 @@ class Node(BaseEntity):
             try:
                 ipaddress.ip_address(ip)
             except ValueError:
-                raise InvalidNodeDataError(
+                raise NodeInvalidDataError(
                     f"Invalid IP address: {ip}"
                 )
 
@@ -303,7 +303,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_port(port: int) -> None:
         if port < 1 or port > 65535:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Port must be between 1 and 65535"
             )
 
@@ -311,7 +311,7 @@ class Node(BaseEntity):
     @staticmethod
     def _validate_max_roots(max_roots: int) -> None:
         if max_roots <= 0:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Max roots must be positive"
             )
 
@@ -322,6 +322,6 @@ class Node(BaseEntity):
     ) -> None:
 
         if scan_interval_minutes <= 0:
-            raise InvalidNodeDataError(
+            raise NodeInvalidDataError(
                 "Default scan interval must be positive"
             )
