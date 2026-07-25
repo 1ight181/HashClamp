@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from shared.exceptions.not_found import EntityNotFoundError
+from app.application.exceptions.not_found import EntityNotFoundError
 from app.presentation.http.v1.error_handlers.not_found import entity_not_found_handler
 
 
