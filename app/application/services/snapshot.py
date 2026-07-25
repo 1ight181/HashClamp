@@ -3,8 +3,7 @@ from uuid import UUID
 from app.application.exceptions.not_found import SnapshotNotFoundError
 from app.domain.entities.snapshot.models import Snapshot
 from app.domain.repositories.snapshot import SnapshotRepository
-
-from shared.exceptions.already_exists import EntityAlreadyExistsError
+from app.shared.exceptions.already_exists import EntityAlreadyExistsError
 
 
 class SnapshotService:

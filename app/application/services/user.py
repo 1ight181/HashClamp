@@ -3,7 +3,7 @@ from uuid import UUID
 from app.application.exceptions.not_found import UserNotFoundError
 from app.domain.entities.user.models import User
 from app.domain.repositories.user import UserRepository
-from shared.exceptions.already_exists import EntityAlreadyExistsError, UserAlreadyExistsError
+from app.shared.exceptions.already_exists import EntityAlreadyExistsError
 
 
 class UserService:

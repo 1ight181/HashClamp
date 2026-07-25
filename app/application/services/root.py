@@ -3,8 +3,7 @@ from uuid import UUID
 from app.application.exceptions.not_found import RootNotFoundError
 from app.domain.entities.root.models import Root
 from app.domain.repositories.root import RootRepository
-
-from shared.exceptions.already_exists import EntityAlreadyExistsError
+from app.shared.exceptions.already_exists import EntityAlreadyExistsError
 
 
 class RootService:

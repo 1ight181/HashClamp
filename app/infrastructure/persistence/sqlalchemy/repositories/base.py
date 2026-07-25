@@ -8,8 +8,7 @@ from sqlalchemy import select
 from app.domain.entities.base import BaseEntity
 from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.base import Base
-
-from shared.exceptions.already_exists import EntityAlreadyExistsError
+from app.shared.exceptions.already_exists import EntityAlreadyExistsError
 
 T_domain = TypeVar("T_domain", bound=BaseEntity)
 T_orm = TypeVar("T_orm", bound=Base)
