@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import Field, BaseModel, EmailStr, ConfigDict
+from pydantic import Field, BaseModel, EmailStr, ConfigDict, model_validator
 
 
 class UserCreateRequest(BaseModel):
@@ -11,11 +11,23 @@ class UserCreateRequest(BaseModel):
 
     fullname: str | None = None
 
+    default_scan_interval_minutes: int = Field(default=30, gt=0)
+    max_nodes: int = Field(default=5, gt=0)
+
     should_notify_on_changes: bool = False
     notification_email: EmailStr | None = None
 
-    default_scan_interval_minutes: int = Field(default=30, gt=0)
-    max_nodes: int = Field(default=5, gt=0)
+    @model_validator(mode="after")
+    def validate_notifications(self):
+        if (
+            self.should_notify_on_changes
+            and self.notification_email is None
+        ):
+            raise ValueError(
+                "Notification email is required when notifications are enabled"
+            )
+
+        return self
 
 
 class UserUpdateRequest(BaseModel):
@@ -30,6 +42,18 @@ class UserUpdateRequest(BaseModel):
 
     is_active: bool | None = None
     is_superuser: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_notifications(self):
+        if (
+                self.should_notify_on_changes
+                and self.notification_email is None
+        ):
+            raise ValueError(
+                "Notification email is required when notifications are enabled"
+            )
+
+        return self
 
 
 class UserResponse(BaseModel):
