@@ -3,15 +3,17 @@ from uuid import UUID
 from app.application.exceptions.not_found import UserNotFoundError
 from app.domain.entities.user.models import User
 from app.domain.repositories.user import UserRepository
-from app.shared.exceptions.already_exists import EntityAlreadyExistsError
+from app.domain.security import PasswordHasher
 
 
 class UserService:
     def __init__(
             self,
             repo: UserRepository,
+            password_hasher: PasswordHasher,
     ):
         self._repo = repo
+        self._password_hasher = password_hasher
 
     async def get_user(self, user_id: UUID) -> User:
         user = await self._repo.get_by_id(user_id)
