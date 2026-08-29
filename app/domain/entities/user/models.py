@@ -257,6 +257,11 @@ class User(BaseEntity):
 
         return user
 
+    def change_password(self, password_hash: str) -> None:
+        self._validate_password_hash(password_hash)
+        self.password_hash = password_hash
+
+
     @staticmethod
     def _validate_username(
             username: str,
