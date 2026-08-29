@@ -1,7 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, status, Depends
 
 from app.application.cmd.create_user import CreateUserCommand
 from app.application.cmd.update_user import UpdateUserCommand
@@ -47,3 +46,10 @@ async def update_user(
     )
 
     return await service.update_user(user_id, cmd)
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+    user_id: UUID,
+    service: UserService = Depends(get_user_service),
+):
+    await service.delete_user(user_id)
