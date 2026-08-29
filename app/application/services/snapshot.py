@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.application.exceptions.not_found import SnapshotNotFoundError
+from app.shared.exceptions.not_found import SnapshotNotFoundError
 from app.domain.entities.snapshot.models import Snapshot
 from app.domain.repositories.snapshot import SnapshotRepository
 from app.shared.exceptions.already_exists import EntityAlreadyExistsError

@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from app.application.exceptions.not_found import NodeNotFoundError
+from app.shared.exceptions.not_found import NodeNotFoundError
 from app.domain.entities.node.models import Node
 from app.domain.repositories.node import NodeRepository
 from app.shared.exceptions.already_exists import EntityAlreadyExistsError
