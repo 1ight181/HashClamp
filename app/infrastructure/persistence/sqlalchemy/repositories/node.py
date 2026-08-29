@@ -57,19 +57,19 @@ class SqlAlchemyNodeRepository(
 
     def _to_domain(
         self,
-        node_orm: NodeModel,
+        orm: NodeModel,
     ) -> Node:
         return Node.restore(
-            id=node_orm.id,
-            name=node_orm.name,
-            os_type=node_orm.os_type,
-            os_version=node_orm.os_version,
-            user_id=node_orm.user_id,
-            hostname=node_orm.hostname,
-            ip_addresses=node_orm.ip_addresses,
-            port=node_orm.port,
-            max_roots=node_orm.max_roots,
-            default_scan_interval_minutes=node_orm.default_scan_interval_minutes,
+            id=orm.id,
+            name=orm.name,
+            os_type=orm.os_type,
+            os_version=orm.os_version,
+            user_id=orm.user_id,
+            hostname=orm.hostname,
+            ip_addresses=orm.ip_addresses,
+            port=orm.port,
+            max_roots=orm.max_roots,
+            default_scan_interval_minutes=orm.default_scan_interval_minutes,
         )
 
     def _update_orm_from_domain(

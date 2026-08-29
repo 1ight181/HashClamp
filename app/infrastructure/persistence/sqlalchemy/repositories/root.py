@@ -76,14 +76,14 @@ class SqlAlchemyRootRepository(
 
     def _to_domain(
         self,
-        root_orm: RootModel,
+        orm: RootModel,
     ) -> Root:
         return Root.restore(
-            id=root_orm.id,
-            path=Path(root_orm.path),
-            alias=root_orm.alias,
-            node_id=root_orm.node_id,
-            scan_interval_minutes=root_orm.scan_interval_minutes,
+            id=orm.id,
+            path=Path(orm.path),
+            alias=orm.alias,
+            node_id=orm.node_id,
+            scan_interval_minutes=orm.scan_interval_minutes,
         )
 
     def _update_orm_from_domain(

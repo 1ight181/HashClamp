@@ -37,19 +37,19 @@ class SqlAlchemyUserRepository(UserRepository, SqlAlchemyBaseRepository[User, Us
         return self._to_domain(orm) if orm else None
 
 
-    def _to_domain(self, user_orm: UserModel) -> User:
+    def _to_domain(self, orm: UserModel) -> User:
         return User.restore(
-            id=user_orm.id,
-            username=user_orm.username,
-            email=user_orm.email,
-            password_hash=user_orm.password_hash,
-            fullname=user_orm.fullname,
-            notification_email=user_orm.notification_email,
-            should_notify_on_changes=user_orm.should_notify_on_changes,
-            default_scan_interval_minutes=user_orm.default_scan_interval_minutes,
-            max_nodes=user_orm.max_nodes,
-            is_active=user_orm.is_active,
-            is_superuser=user_orm.is_superuser,
+            id=orm.id,
+            username=orm.username,
+            email=orm.email,
+            password_hash=orm.password_hash,
+            fullname=orm.fullname,
+            notification_email=orm.notification_email,
+            should_notify_on_changes=orm.should_notify_on_changes,
+            default_scan_interval_minutes=orm.default_scan_interval_minutes,
+            max_nodes=orm.max_nodes,
+            is_active=orm.is_active,
+            is_superuser=orm.is_superuser,
         )
 
     def _update_orm_from_domain(self, orm: UserModel, domain: User):
