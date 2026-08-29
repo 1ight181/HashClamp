@@ -1,18 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from enum import Enum
-from typing import TypedDict, Unpack
+
+from typing import Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
 from app.domain.entities.snapshot.exceptions import SnapshotInvalidDataError
-
-
-class SnapshotStatus(str, Enum):
-    CREATED = "created"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
+from app.domain.entities.snapshot.types import SnapshotStatus, SnapshotUpdateOptions
 
 
 @dataclass
@@ -67,8 +61,7 @@ class Snapshot(BaseEntity):
             created_at=created_at,
         )
 
-    class SnapshotUpdateOptions(TypedDict, total=False):
-        status: SnapshotStatus
+
 
     def update(
             self,

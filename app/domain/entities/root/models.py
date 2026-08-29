@@ -1,9 +1,10 @@
 from pathlib import Path
 from dataclasses import dataclass
-from typing import TypedDict, Unpack
+from typing import Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
+from app.domain.entities.root.types import RootUpdateOptions
 from exceptions import (
     RootInvalidDataError
 )
@@ -70,13 +71,6 @@ class Root(BaseEntity):
             node_id=node_id,
             scan_interval_minutes=scan_interval_minutes,
         )
-
-
-    class RootUpdateOptions(TypedDict, total=False):
-        path: Path
-        alias: str
-        scan_interval_minutes: int
-
 
     def update(
             self,

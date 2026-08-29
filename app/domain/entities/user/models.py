@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import TypedDict, Unpack
+from typing import Unpack
 from uuid import UUID
 
 import re
 
 from app.domain.entities.base import BaseEntity
+from app.domain.entities.user.types import UserUpdateOptions, UserCreateOptions, UserRestoreOptions
 from exceptions import UserInvalidDataError
 
 
@@ -30,15 +31,6 @@ class User(BaseEntity):
     max_nodes: int = 5
     should_notify_on_changes: bool = False
     notification_email: str | None = None
-
-
-    class UserCreateOptions(TypedDict, total=False):
-        fullname: str | None
-        notification_email: str
-        should_notify_on_changes: bool
-        default_scan_interval_minutes: int
-        max_nodes: int
-
 
     @classmethod
     def create(
@@ -107,18 +99,6 @@ class User(BaseEntity):
             password_hash=password_hash,
             **kwargs,
         )
-
-
-    class UserUpdateOptions(TypedDict, total=False):
-        username: str
-        email: str
-        default_scan_interval_minutes: int
-        max_nodes: int
-        should_notify_on_changes: bool
-        notification_email: str
-        is_active: bool
-        is_superuser: bool
-
 
     def update(
             self,
@@ -209,15 +189,6 @@ class User(BaseEntity):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-    class UserRestoreOptions(TypedDict, total=False):
-        fullname: str | None
-        notification_email: str | None
-        should_notify_on_changes: bool
-        default_scan_interval_minutes: int
-        max_nodes: int
-        is_active: bool
-        is_superuser: bool
 
     @classmethod
     def restore(

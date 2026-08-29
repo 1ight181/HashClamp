@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from typing import TypedDict, Unpack
+from typing import Unpack
 from uuid import UUID
 
 import ipaddress
 import re
 
 from app.domain.entities.base import BaseEntity
+from app.domain.entities.node.types import NodeUpdateOptions, NodeOptions
 from exceptions import (
-    NodeInvalidDataError,
-    InvalidNodeUpdateError,
+    NodeInvalidDataError
 )
 
 
@@ -33,12 +33,6 @@ class Node(BaseEntity):
     max_roots: int = 50
     default_scan_interval_minutes: int = 30
 
-    class NodeOptions(TypedDict, total=False):
-        hostname: str | None
-        ip_addresses: list[str] | None
-        port: int | None
-        max_roots: int
-        default_scan_interval_minutes: int
 
     @classmethod
     def create(
@@ -99,16 +93,6 @@ class Node(BaseEntity):
             **kwargs,
         )
 
-    class NodeUpdateOptions(TypedDict, total=False):
-        name: str
-        os_type: str
-        os_version: str
-        hostname: str
-        ip_addresses: list[str]
-        port: int
-        max_roots: int
-        default_scan_interval_minutes: int
-
 
     def update(
             self,
@@ -129,7 +113,7 @@ class Node(BaseEntity):
         unknown_fields = set(kwargs) - allowed_fields
 
         if unknown_fields:
-            raise InvalidNodeUpdateError(
+            raise NodeInvalidDataError(
                 f"Unknown fields: {unknown_fields}"
             )
 
@@ -179,7 +163,7 @@ class Node(BaseEntity):
 
 
         except NodeInvalidDataError as error:
-            raise InvalidNodeUpdateError(
+            raise NodeInvalidDataError(
                 str(error)
             )
 

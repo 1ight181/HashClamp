@@ -3,11 +3,12 @@ import re
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypedDict, Unpack
+from typing import  Unpack
 from uuid import UUID
 
 from app.domain.entities.base import BaseEntity
 from app.domain.entities.snapshot_file.exceptions import SnapshotFileInvalidDataError
+from app.domain.entities.snapshot_file.types import FileEntryUpdateOptions
 
 FILENAME_REGEX = re.compile(
     r'^[^\\/:*?"<>|]+$'
@@ -24,11 +25,7 @@ class SnapshotFile(BaseEntity):
     file_size: int
     hash_base64: str
 
-    class FileEntryUpdateOptions(TypedDict, total=False):
-        relative_path: Path
-        filename: str
-        file_size: int
-        hash_base64: str
+
 
     @classmethod
     def create(
