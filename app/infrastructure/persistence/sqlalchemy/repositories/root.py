@@ -8,7 +8,7 @@ from app.domain.repositories.root import RootRepository
 from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.root import RootModel
 from app.infrastructure.persistence.sqlalchemy.repositories.base import (
-    SqlAlchemyBaseRepository,
+    SqlAlchemyBaseRepository, T_orm, T_domain,
 )
 
 
@@ -74,8 +74,8 @@ class SqlAlchemyRootRepository(
 
         return self._to_domain(orm) if orm else None
 
+    @staticmethod
     def _to_domain(
-        self,
         orm: RootModel,
     ) -> Root:
         return Root.restore(
@@ -86,13 +86,20 @@ class SqlAlchemyRootRepository(
             scan_interval_minutes=orm.scan_interval_minutes,
         )
 
-    def _update_orm_from_domain(
-        self,
-        orm: RootModel,
+    @staticmethod
+    def _from_domain(
         domain: Root,
-    ):
-        orm.id = domain.id
+    ) -> RootModel:
+        return RootModel(
+            id=domain.id,
+            path=domain.path,
+            alias=domain.alias,
+            node_id=domain.node_id,
+            scan_interval_minutes=domain.scan_interval_minutes,
+        )
+
+    @staticmethod
+    def _update_orm_from_domain(orm: RootModel, domain: Root):
         orm.path = str(domain.path)
-        orm.alias = domain.alias
-        orm.node_id = domain.node_id
-        orm.scan_interval_minutes = domain.scan_interval_minutes
+        orm.alias = orm.alias
+        orm.scan_interval_minutes = orm.scan_interval_minutes

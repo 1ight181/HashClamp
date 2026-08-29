@@ -19,7 +19,7 @@ from app.infrastructure.persistence.sqlalchemy.models.snapshot_file import (
 )
 
 from app.infrastructure.persistence.sqlalchemy.repositories.base import (
-    SqlAlchemyBaseRepository,
+    SqlAlchemyBaseRepository, T_orm, T_domain,
 )
 
 class SqlAlchemySnapshotRepository(
@@ -193,9 +193,8 @@ class SqlAlchemySnapshotRepository(
 
         return result.scalar_one()
 
-
+    @staticmethod
     def _to_domain(
-        self,
         orm: SnapshotModel,
     ) -> Snapshot:
 
@@ -206,14 +205,14 @@ class SqlAlchemySnapshotRepository(
             created_at=orm.created_at,
         )
 
-    def _update_orm_from_domain(
-        self,
-        orm: SnapshotModel,
+    @staticmethod
+    def _from_domain(
         domain: Snapshot,
-    ):
-        orm.root_id = domain.root_id
-        orm.status = domain.status.value
-        orm.created_at = domain.created_at
+    ) -> SnapshotModel:
+        return SnapshotModel(
+            root_id=domain.root_id,
+            status=domain.status,
+        )
 
     @staticmethod
     def _snapshot_file_to_domain(
@@ -227,3 +226,9 @@ class SqlAlchemySnapshotRepository(
             file_size=orm.file_size,
             hash_base64=orm.hash_base64,
         )
+
+    @staticmethod
+    def _update_orm_from_domain(orm: SnapshotModel, domain: Snapshot):
+        orm.status = SnapshotStatus(orm.status)
+
+

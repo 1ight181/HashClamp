@@ -4,7 +4,7 @@ from app.domain.entities.user.models import User
 from app.domain.repositories.user import UserRepository
 from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.user import UserModel
-from app.infrastructure.persistence.sqlalchemy.repositories.base import SqlAlchemyBaseRepository
+from app.infrastructure.persistence.sqlalchemy.repositories.base import SqlAlchemyBaseRepository, T_orm, T_domain
 
 
 class SqlAlchemyUserRepository(UserRepository, SqlAlchemyBaseRepository[User, UserModel]):
@@ -36,8 +36,8 @@ class SqlAlchemyUserRepository(UserRepository, SqlAlchemyBaseRepository[User, Us
 
         return self._to_domain(orm) if orm else None
 
-
-    def _to_domain(self, orm: UserModel) -> User:
+    @staticmethod
+    def _to_domain(orm: UserModel) -> User:
         return User.restore(
             id=orm.id,
             username=orm.username,
@@ -52,15 +52,37 @@ class SqlAlchemyUserRepository(UserRepository, SqlAlchemyBaseRepository[User, Us
             is_superuser=orm.is_superuser,
         )
 
-    def _update_orm_from_domain(self, orm: UserModel, domain: User):
-        orm.id = domain.id
+    @staticmethod
+    def _from_domain(domain: User) -> UserModel:
+        return UserModel(
+            id=domain.id,
+            username=domain.username,
+            email=domain.email,
+            password_hash=domain.password_hash,
+            fullname=domain.fullname,
+            notification_email=domain.notification_email,
+            should_notify_on_changes=domain.should_notify_on_changes,
+            default_scan_interval_minutes=domain.default_scan_interval_minutes,
+            max_nodes=domain.max_nodes,
+            is_active=domain.is_active,
+            is_superuser=domain.is_superuser,
+        )
+
+    @staticmethod
+    def _update_orm_from_domain(orm: UserModel, domain: User):
         orm.username = domain.username
         orm.email = domain.email
+
         orm.password_hash = domain.password_hash
+
         orm.fullname = domain.fullname
-        orm.notification_email = domain.notification_email
-        orm.should_notify_on_changes = domain.should_notify_on_changes
-        orm.default_scan_interval_minutes = domain.default_scan_interval_minutes
-        orm.max_nodes = domain.max_nodes
+
         orm.is_active = domain.is_active
         orm.is_superuser = domain.is_superuser
+
+        orm.default_scan_interval_minutes = domain.default_scan_interval_minutes
+        orm.max_nodes = domain.max_nodes
+        orm.should_notify_on_changes = domain.should_notify_on_changes
+        orm.notification_email = domain.notification_email
+
+

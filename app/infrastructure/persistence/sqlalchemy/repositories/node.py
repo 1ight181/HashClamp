@@ -7,7 +7,7 @@ from app.domain.repositories.node import NodeRepository
 from app.infrastructure.persistence.sqlalchemy.constraints.constraint_registry import ConstraintRegistry
 from app.infrastructure.persistence.sqlalchemy.models.node import NodeModel
 from app.infrastructure.persistence.sqlalchemy.repositories.base import (
-    SqlAlchemyBaseRepository,
+    SqlAlchemyBaseRepository, T_orm, T_domain,
 )
 
 
@@ -55,8 +55,8 @@ class SqlAlchemyNodeRepository(
 
         return self._to_domain(orm) if orm else None
 
+    @staticmethod
     def _to_domain(
-        self,
         orm: NodeModel,
     ) -> Node:
         return Node.restore(
@@ -72,18 +72,32 @@ class SqlAlchemyNodeRepository(
             default_scan_interval_minutes=orm.default_scan_interval_minutes,
         )
 
-    def _update_orm_from_domain(
-        self,
-        orm: NodeModel,
+    @staticmethod
+    def _from_domain(
         domain: Node,
-    ) -> None:
-        orm.id = domain.id
+    ) -> NodeModel:
+        return NodeModel(
+            id=domain.id,
+            name=domain.name,
+            os_type=domain.os_type,
+            os_version=domain.os_version,
+            user_id=domain.user_id,
+            hostname=domain.hostname,
+            ip_addresses=domain.ip_addresses,
+            port=domain.port,
+            max_roots=domain.max_roots,
+            default_scan_interval_minutes=domain.default_scan_interval_minutes,
+        )
+
+    @staticmethod
+    def _update_orm_from_domain(orm: NodeModel, domain: Node):
         orm.name = domain.name
         orm.os_type = domain.os_type
         orm.os_version = domain.os_version
-        orm.user_id = domain.user_id
+
         orm.hostname = domain.hostname
         orm.ip_addresses = domain.ip_addresses
         orm.port = domain.port
-        orm.max_roots = domain.max_roots
+
         orm.default_scan_interval_minutes = domain.default_scan_interval_minutes
+        orm.max_roots = domain.max_roots
