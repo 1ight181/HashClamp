@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Any
+
+from app.domain.entities.user.types import UserUpdateOptions
 
 
 @dataclass(frozen=True)
 class UpdateUserCommand:
-    changes: dict[str, Any]
+    changes: UserUpdateOptions

@@ -27,8 +27,13 @@ async def create_user(
     user_create_req: UserCreateRequest,
     service: UserService = Depends(get_user_service),
 ) -> UserResponse:
+    user_data = user_create_req.model_dump(exclude_unset=True)
+
     cmd = CreateUserCommand(
-        **user_create_req.model_dump(exclude_unset=True),
+        username=user_data.pop("username"),
+        email=user_data.pop("email"),
+        password=user_data.pop("password"),
+        opts=user_data,
     )
 
     created_user = await service.create_user(cmd)
