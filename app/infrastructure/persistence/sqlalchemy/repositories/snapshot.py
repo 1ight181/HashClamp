@@ -155,9 +155,11 @@ class SqlAlchemySnapshotRepository(
         await self.session.flush()
 
 
-    async def get_all_snapshot_files_by_snapshot_id(
+    async def get_snapshot_files_by_snapshot_id(
         self,
         snapshot_id: UUID,
+        offset: int,
+        limit: int,
     ) -> list[SnapshotFile]:
 
         result = await self.session.execute(
@@ -165,6 +167,8 @@ class SqlAlchemySnapshotRepository(
             .where(
                 SnapshotFileModel.snapshot_id == snapshot_id
             )
+            .offset(offset)
+            .limit(limit)
         )
 
         return [
