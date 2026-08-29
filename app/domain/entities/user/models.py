@@ -77,7 +77,6 @@ class User(BaseEntity):
 
         should_notify = kwargs.get(
             "should_notify_on_changes",
-            False,
         )
 
         cls._validate_notifications(
@@ -125,68 +124,60 @@ class User(BaseEntity):
                 f"Unknown fields: {unknown_fields}"
             )
 
+        username = kwargs.get("username")
 
-        try:
-            username = kwargs.get("username")
-
-            if username is not None:
-                self._validate_username(username)
+        if username is not None:
+            self._validate_username(username)
 
 
-            email = kwargs.get("email")
+        email = kwargs.get("email")
 
-            if email is not None:
-                self._validate_email(email)
+        if email is not None:
+            self._validate_email(email)
 
+        notification_email = kwargs.get(
+            "notification_email"
+        )
 
-            notification_email = kwargs.get(
-                "notification_email"
+        if notification_email is not None:
+            self._validate_email(
+                notification_email,
+                notification=True,
             )
 
-            if notification_email is not None:
-                self._validate_email(
-                    notification_email,
-                    notification=True,
-                )
 
+        should_notify = kwargs.get(
+            "should_notify_on_changes"
+        )
 
-            should_notify = kwargs.get(
-                "should_notify_on_changes"
+        if should_notify is not None:
+            self._validate_notifications(
+                should_notify,
+                notification_email
+                if notification_email is not None
+                else self.notification_email,
             )
 
-            if should_notify is not None:
-                self._validate_notifications(
-                    should_notify,
-                    notification_email
-                    if notification_email is not None
-                    else self.notification_email,
-                )
 
+        scan_interval = kwargs.get(
+            "default_scan_interval_minutes"
+        )
 
-            scan_interval = kwargs.get(
-                "default_scan_interval_minutes"
+        if scan_interval is not None:
+            self._validate_scan_interval(
+                scan_interval
             )
 
-            if scan_interval is not None:
-                self._validate_scan_interval(
-                    scan_interval
-                )
 
+        max_nodes = kwargs.get(
+            "max_nodes"
+        )
 
-            max_nodes = kwargs.get(
-                "max_nodes"
+        if max_nodes is not None:
+            self._validate_max_nodes(
+                max_nodes
             )
 
-            if max_nodes is not None:
-                self._validate_max_nodes(
-                    max_nodes
-                )
-
-
-        except UserInvalidDataError as error:
-            raise UserInvalidDataError(
-                str(error)
-            )
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -331,7 +322,7 @@ class User(BaseEntity):
 
     @staticmethod
     def _validate_notifications(
-            should_notify: bool,
+            should_notify: bool | None,
             notification_email: str | None,
     ) -> None:
 
