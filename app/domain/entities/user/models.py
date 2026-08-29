@@ -108,6 +108,7 @@ class User(BaseEntity):
         allowed_fields = {
             "username",
             "email",
+            "fullname",
             "default_scan_interval_minutes",
             "max_nodes",
             "should_notify_on_changes",

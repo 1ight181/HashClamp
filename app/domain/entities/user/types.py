@@ -13,6 +13,7 @@ class UserUpdateOptions(TypedDict, total=False):
     username: str
     email: str
     default_scan_interval_minutes: int
+    fullname: str | None
     max_nodes: int
     should_notify_on_changes: bool
     notification_email: str
