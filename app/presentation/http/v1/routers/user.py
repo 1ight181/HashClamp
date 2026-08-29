@@ -35,7 +35,7 @@ async def create_user(
 
     return UserResponse.model_validate(created_user)
 
-@router.put("/{user_id}", response_model=UserResponse)
+@router.put("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_user(
     user_id: UUID,
     user_update_req: UserUpdateRequest,
@@ -45,7 +45,7 @@ async def update_user(
         changes=user_update_req.model_dump(exclude_unset=True),
     )
 
-    return await service.update_user(user_id, cmd)
+    await service.update_user(user_id, cmd)
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
