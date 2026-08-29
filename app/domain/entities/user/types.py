@@ -16,7 +16,7 @@ class UserUpdateOptions(TypedDict, total=False):
     fullname: str | None
     max_nodes: int
     should_notify_on_changes: bool
-    notification_email: str
+    notification_email: str | None
     is_active: bool
     is_superuser: bool
 
